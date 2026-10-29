@@ -1,6 +1,6 @@
 import type { NextRequest } from "next/server";
+import { CREDENTIAL_PREFIX } from "@/lib/credentials";
 import {
-  identityResult,
   managementJson,
   managementRpc,
   publicIdParam,
@@ -9,7 +9,8 @@ import {
   requireBearer,
   unavailableResult,
 } from "@/lib/agent-management";
-import { parseRegistration } from "@/lib/registration";
+import { lookupIdentity, updateIdentity } from "@/lib/identity-commands";
+import { identityRpc } from "@/lib/identity-rpc";
 import { lookupPublicAgent } from "@/lib/identity-read";
 
 export const runtime = "nodejs";
@@ -35,14 +36,8 @@ export async function GET(request: NextRequest, context: Context) {
     if (proved) return proved;
   }
 
-  const result = await lookupPublicAgent(publicId);
-  if (!result.ok) {
-    return managementJson({ error: "kya_unavailable", message: "The identity service is unavailable." }, 503);
-  }
-  if (!result.data) {
-    return managementJson({ error: "kya_not_found", message: "The identity was not found." }, 404);
-  }
-  return managementJson(result.data, 200);
+  const result = await lookupIdentity(publicId, lookupPublicAgent);
+  return managementJson(result.body, result.status);
 }
 
 async function proveActiveCredential(publicId: string, token: string): Promise<Response | null> {
@@ -61,8 +56,7 @@ function validCredential(value: unknown, publicId: string): boolean {
     : null;
   if (!record || record.publicId !== publicId || record.credentialValid !== true) return false;
   if (record.lifecycle !== "active" && record.lifecycle !== "suspended") return false;
-  return typeof record.credentialPrefix === "string"
-    && /^kya_mgmt_[0-9a-hjkmnp-tv-z]{8}$/.test(record.credentialPrefix);
+  return typeof record.credentialPrefix === "string" && CREDENTIAL_PREFIX.test(record.credentialPrefix);
 }
 
 export async function PATCH(request: NextRequest, context: Context) {
@@ -85,29 +79,6 @@ export async function PATCH(request: NextRequest, context: Context) {
   ]);
   if ("response" in parsedBody) return parsedBody.response;
 
-  const parsed = parseRegistration(parsedBody.body);
-  if (!parsed.ok) {
-    return managementJson(
-      { error: "kya_invalid", message: parsed.failure.message, fields: parsed.failure.fields },
-      400,
-    );
-  }
-
-  const result = await managementRpc("update_agent_metadata", {
-    p_public_id: publicId,
-    p_presented_token: auth.token,
-    p_actor_user_id: null,
-    p_name: parsed.data.name,
-    p_description: parsed.data.description,
-    p_endpoint_url: parsed.data.endpointUrl,
-    p_claimed_host: parsed.data.claimedHost,
-    p_category: parsed.data.category,
-    p_capabilities: parsed.data.capabilities,
-    p_agent_card_url: parsed.data.agentCardUrl,
-  });
-  if ("response" in result) return result.response;
-
-  const identity = identityResult(result.data);
-  if (!identity) return unavailableResult();
-  return managementJson(identity, 200);
+  const result = await updateIdentity({ publicId, token: auth.token, body: parsedBody.body }, identityRpc);
+  return managementJson(result.body, result.status);
 }

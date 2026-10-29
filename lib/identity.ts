@@ -1,3 +1,5 @@
+import { isPublicId } from "./credentials.ts";
+
 export const AGENT_CATEGORIES = [
   "Research",
   "Commerce",
@@ -54,8 +56,6 @@ export type IdentityRead<T> =
   | { ok: true; data: T }
   | { ok: false; reason: IdentityReadFailure };
 
-const PUBLIC_ID = /^kya_[0-9a-hjkmnp-tv-z]{26}$/;
-
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
@@ -106,7 +106,7 @@ export function isPublicAgentIdentity(value: PublicIdentity): value is PublicAge
 export function parsePublicIdentity(value: unknown): PublicIdentity | null {
   if (!isRecord(value) || value.registered !== true) return null;
   const publicId = text(value, "publicId");
-  if (!publicId || !PUBLIC_ID.test(publicId)) return null;
+  if (!publicId || !isPublicId(publicId)) return null;
   if (text(value, "identityUrl") !== identityPath(publicId)) return null;
 
   if (value.lifecycle === "suspended" || value.lifecycle === "revoked") {

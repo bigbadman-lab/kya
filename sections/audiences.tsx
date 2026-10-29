@@ -17,7 +17,7 @@ export function Audiences() {
         <div className="border-t border-dashed border-zinc-800 pt-6">
           <h3 className="text-base text-zinc-50">AI agents</h3>
           <p className="mt-3 text-sm/5.5 font-light text-zinc-400">
-            An agent can register with POST /api/v1/agents/register, then verify its host and update the profile with the management token. MCP is not available.
+            An agent can register with POST /api/v1/agents/register or the remote MCP endpoint at /mcp, then verify its host and update the profile with the management token. Production serves https://knowyouragent.fun/mcp after this version is deployed.
           </p>
         </div>
       </div>

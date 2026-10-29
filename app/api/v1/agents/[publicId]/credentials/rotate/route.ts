@@ -1,13 +1,12 @@
 import type { NextRequest } from "next/server";
 import {
   managementJson,
-  managementRpc,
   publicIdParam,
   readJsonObject,
   requireBearer,
-  rotatedCredential,
-  unavailableResult,
 } from "@/lib/agent-management";
+import { rotateManagementCredential } from "@/lib/identity-commands";
+import { identityRpc } from "@/lib/identity-rpc";
 
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -23,18 +22,9 @@ export async function POST(request: NextRequest, context: Context) {
   if (!publicId) {
     return managementJson({ error: "kya_not_found", message: "The identity was not found." }, 404);
   }
-
   const parsedBody = await readJsonObject(request, []);
   if ("response" in parsedBody) return parsedBody.response;
 
-  const result = await managementRpc("rotate_management_credential", {
-    p_public_id: publicId,
-    p_presented_token: auth.token,
-    p_actor_user_id: null,
-  });
-  if ("response" in result) return result.response;
-
-  const rotated = rotatedCredential(result.data, publicId);
-  if (!rotated) return unavailableResult();
-  return managementJson(rotated, 200);
+  const result = await rotateManagementCredential({ publicId, token: auth.token }, identityRpc);
+  return managementJson(result.body, result.status);
 }

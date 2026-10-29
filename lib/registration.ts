@@ -1,5 +1,5 @@
-import { AGENT_CAPABILITIES, AGENT_CATEGORIES, type AgentCapability, type AgentCategory } from "@/lib/identity";
-import { isPublicHostname } from "@/lib/client-address";
+import { AGENT_CAPABILITIES, AGENT_CATEGORIES, type AgentCapability, type AgentCategory } from "./identity.ts";
+import { isPublicHostname } from "./client-address.ts";
 
 export const REGISTRATION_BODY_LIMIT = 8192;
 

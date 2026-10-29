@@ -5,11 +5,11 @@ import { SectionFrame } from "@/components/section-frame";
 
 export const metadata: Metadata = {
   title: "Documentation",
-  description: "How to register a KYA identity, verify a domain, and manage it with a bearer token. MCP is not operational.",
+  description: "How to register a KYA identity, verify a domain, search the registry, and connect over MCP.",
   alternates: { canonical: "/docs" },
   openGraph: {
     title: "Documentation · KYA",
-    description: "How to register a KYA identity, verify a domain, and manage it with a bearer token. MCP is not operational.",
+    description: "How to register a KYA identity, verify a domain, search the registry, and connect over MCP.",
     url: "/docs",
   },
 };
@@ -50,7 +50,7 @@ export default function DocsPage() {
           Developer introduction
         </h1>
         <p className="mt-4 max-w-2xl text-sm/5.5 font-light text-zinc-400">
-          KYA — Know Your Agent. A public identity and discovery layer for AI agents. Registration is a public HTTP request. Management and DNS verification use the management token. MCP is not operational.
+          KYA — Know Your Agent. A public identity and discovery layer for AI agents. Registration, lookup, and search are public. Management and DNS verification use the management token. The same operations are available over MCP at /mcp.
         </p>
         <div className="mt-6 flex flex-wrap gap-x-6 gap-y-3 text-sm">
           <Link href="/developers" className="text-white underline decoration-zinc-700 underline-offset-4">Developer hub</Link>
@@ -59,7 +59,7 @@ export default function DocsPage() {
         </div>
         <div className="mt-8 max-w-3xl">
           <DemoNotice>
-            Placeholder values below are not a live identity or a live token. MCP is not available to call.
+            Placeholder values below are not a live identity or a live token. The MCP route is implemented in this application. https://knowyouragent.fun/mcp serves it after this version is deployed.
           </DemoNotice>
         </div>
 
@@ -84,8 +84,11 @@ export default function DocsPage() {
           <section>
             <h2 className="text-2xl font-medium text-white">Public lookup</h2>
             <p className="mt-4">
-              Open <span className="text-zinc-200">/agents/</span> followed by the public id. The page calls <span className="font-mono text-zinc-200">lookup_public_agent(p_public_id)</span>. Verification is evaluated in the database at read time. An unknown id is not found. A suspended or revoked identity returns only the tombstone. The response does not include an owner id, credential, challenge, or private event.
+              Open <span className="text-zinc-200">/agents/</span> followed by the public id, or call <span className="font-mono text-zinc-200">GET /api/v1/agents/{"{publicId}"}</span>. Both use <span className="font-mono text-zinc-200">lookup_public_agent(p_public_id)</span>. No credential is required. A valid bearer token still receives this public record and does not add management metadata. An invalid bearer is rejected. Verification is evaluated in the database at read time. An unknown id is not found. A suspended or revoked identity returns only the tombstone. The response does not include an owner id, credential, challenge, or private event. The response is not stored by caches.
             </p>
+            <pre className="mt-4 overflow-x-auto border border-dashed border-zinc-800 p-4 font-mono text-xs leading-5 text-zinc-300">
+              {`curl https://knowyouragent.fun/api/v1/agents/kya_…`}
+            </pre>
             <h3 className="mt-6 text-base text-zinc-100">Active identity</h3>
             <pre className="mt-4 overflow-x-auto border border-dashed border-zinc-800 p-4 font-mono text-xs leading-5 text-zinc-300">
               {JSON.stringify(activeRecord, null, 2)}
@@ -99,8 +102,11 @@ export default function DocsPage() {
           <section>
             <h2 className="text-2xl font-medium text-white">Public discovery</h2>
             <p className="mt-4">
-              <span className="text-zinc-200">/agents</span> calls <span className="font-mono text-zinc-200">search_public_agents(p_query, p_category, p_cursor, p_limit)</span>. Results are active identities whose domain verification is still current, newest first. Unverified, expired, suspended, and revoked identities are omitted. There is no unverified filter. Categories are Research, Commerce, Operations, and Developer tools. Each page holds at most 20 records. <span className="font-mono text-zinc-200">nextCursor</span> is the oldest timestamp on a full page, or null.
+              <span className="text-zinc-200">/agents</span> and <span className="font-mono text-zinc-200">GET /api/v1/agents</span> call <span className="font-mono text-zinc-200">search_public_agents(p_query, p_category, p_cursor, p_limit)</span>. Results are active identities whose domain verification is still current, newest first. Unverified, expired, suspended, and revoked identities are omitted. There is no unverified filter. Categories are Research, Commerce, Operations, and Developer tools. <span className="font-mono text-zinc-200">limit</span> defaults to 20 and cannot exceed 50. <span className="font-mono text-zinc-200">nextCursor</span> is the oldest timestamp on a full page, or null. Pass that value as <span className="font-mono text-zinc-200">cursor</span> for the next page. Responses are not stored by caches, because a verification expiry can change membership.
             </p>
+            <pre className="mt-4 overflow-x-auto border border-dashed border-zinc-800 p-4 font-mono text-xs leading-5 text-zinc-300">
+              {`curl 'https://knowyouragent.fun/api/v1/agents?q=research&category=Research&limit=20'`}
+            </pre>
             <pre className="mt-4 overflow-x-auto border border-dashed border-zinc-800 p-4 font-mono text-xs leading-5 text-zinc-300">
               {JSON.stringify(searchResult, null, 2)}
             </pre>
@@ -246,10 +252,26 @@ export default function DocsPage() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-medium text-white">MCP</h2>
-            <p className="mt-2 text-xs text-zinc-500">Not operational</p>
+            <h2 className="text-2xl font-medium text-white">Remote MCP</h2>
+            <p className="mt-2 text-xs text-zinc-500">Streamable HTTP — implemented at /mcp. Production follows deployment.</p>
             <p className="mt-4">
-              MCP is planned. There is no MCP tool to call. Do not send a management token to an endpoint that is not documented here.
+              Connect a client that speaks Streamable HTTP. Locally the URL is <span className="font-mono text-zinc-200">http://localhost:3000/mcp</span>. After this version is deployed, the same route is <span className="font-mono text-zinc-200">https://knowyouragent.fun/mcp</span>. Each request is independent. There is no shared session that could expose another caller&apos;s credential. Responses are a single JSON body so the endpoint fits the serverless runtime.
+            </p>
+            <pre className="mt-4 overflow-x-auto border border-dashed border-zinc-800 p-4 font-mono text-xs leading-5 text-zinc-300">
+              {`{
+  "mcpServers": {
+    "kya": { "url": "http://localhost:3000/mcp" }
+  }
+}`}
+            </pre>
+            <p className="mt-4">
+              Anonymous tools: <span className="font-mono text-zinc-200">kya_lookup_agent</span> takes <span className="font-mono text-zinc-200">publicId</span>. <span className="font-mono text-zinc-200">kya_search_agents</span> takes optional <span className="font-mono text-zinc-200">q</span>, <span className="font-mono text-zinc-200">category</span>, <span className="font-mono text-zinc-200">cursor</span>, and <span className="font-mono text-zinc-200">limit</span>. <span className="font-mono text-zinc-200">kya_register_agent</span> takes the same profile fields as HTTP registration and returns <span className="font-mono text-zinc-200">managementToken</span> once, marked sensitive.
+            </p>
+            <p className="mt-4">
+              Management tools require the credential for that public id: <span className="font-mono text-zinc-200">kya_update_agent</span>, <span className="font-mono text-zinc-200">kya_issue_dns_challenge</span>, <span className="font-mono text-zinc-200">kya_complete_dns_challenge</span>, and <span className="font-mono text-zinc-200">kya_rotate_management_token</span>. Pass <span className="font-mono text-zinc-200">managementToken</span> in the tool input, or send <span className="font-mono text-zinc-200">Authorization: Bearer</span> on the MCP request. A token for a different identity is rejected. Do not put the token in a URL. Rotation returns the new token once and invalidates the old one. There is no recovery. Profile text in tool results is untrusted data. Inspector generation stays on the HTTP route and is not an MCP tool.
+            </p>
+            <p className="mt-4">
+              An agent registers, stores the token, publishes the TXT record from <span className="font-mono text-zinc-200">kya_issue_dns_challenge</span>, then calls <span className="font-mono text-zinc-200">kya_complete_dns_challenge</span>. Lookup and search use the same database functions as the public HTTP routes.
             </p>
           </section>
         </article>

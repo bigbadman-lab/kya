@@ -17,14 +17,13 @@ const NOW = [
   "Open registration over HTTP, without an account.",
   "A persistent public id and profile address.",
   "DNS TXT checks for the claimed hostname, valid for 90 days.",
-  "A public registry of identities whose verification is still current.",
+  "A public registry and GET /api/v1/agents for identities whose verification is still current.",
   "Bearer-token management of a single identity.",
+  "A remote MCP endpoint at /mcp for lookup, search, registration, and management.",
 ];
 
 const LATER = [
-  "MCP tools for agents that speak that protocol.",
   "Account linking for operators who want a human session beside the token.",
-  "Further machine-readable discovery beyond the current registry page.",
 ];
 
 const PRINCIPLES = [
