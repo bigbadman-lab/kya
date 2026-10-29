@@ -421,6 +421,7 @@ const WarpText = ({
   borderColor
 }: Props) => {
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const fallbackRef = useRef<HTMLDivElement | null>(null);
   const propsRef = useRef<RuntimeProps>({
     text,
     color,
@@ -486,7 +487,11 @@ const WarpText = ({
 
   useEffect(() => {
     const container = containerRef.current;
+    const fallback = fallbackRef.current;
     if (!container || typeof window === 'undefined') return undefined;
+
+    const prefersReducedMotion = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
+    if (prefersReducedMotion) return undefined;
 
     let renderer: Renderer;
     let gl: OGLRenderingContext;
@@ -598,6 +603,7 @@ const WarpText = ({
       texture.needsUpdate = true;
       hasRenderedFirstFrame = true;
       canvas.style.opacity = '1';
+      if (fallback) fallback.hidden = true;
       renderer.render({ scene: mesh });
     };
 
@@ -737,6 +743,7 @@ const WarpText = ({
 
     return () => {
       disposed = true;
+      if (fallback) fallback.hidden = false;
       contextRef.current = null;
       if (raf) cancelAnimationFrame(raf);
       resizeObserver?.disconnect();
@@ -763,6 +770,8 @@ const WarpText = ({
     };
   }, []);
 
+  const lines = text.split('\n');
+
   return (
     <div
       ref={containerRef}
@@ -771,7 +780,31 @@ const WarpText = ({
       role="heading"
       aria-level={1}
       aria-label={text}
-    />
+    >
+      <div
+        ref={fallbackRef}
+        aria-hidden="true"
+        className="relative z-0 mx-auto max-w-full px-2 text-center"
+        style={{
+          color,
+          fontSize,
+          fontWeight,
+          fontFamily,
+          letterSpacing,
+          lineHeight,
+        }}
+      >
+        {lines.map((line) => (
+          <span
+            key={line}
+            className={line === borderedText ? 'mt-2 inline-block border px-3 py-1' : 'block'}
+            style={line === borderedText ? { borderColor: borderColor ?? '#27272A' } : undefined}
+          >
+            {line}
+          </span>
+        ))}
+      </div>
+    </div>
   );
 };
 

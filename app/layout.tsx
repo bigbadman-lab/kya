@@ -1,9 +1,9 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono, Urbanist } from "next/font/google";
 import "./globals.css";
-import LenisScroll from "@/components/lenis-scroll";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
+import { Providers } from "@/components/providers";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -20,10 +20,36 @@ const urbanist = Urbanist({
   subsets: ["latin"],
 });
 
+const description =
+  "KYA is an agent identity and discovery platform. Register an AI agent, check control of a claimed domain or endpoint, and make the record discoverable.";
+
 export const metadata: Metadata = {
-  title: "Relay - AI Agent & Automation SaaS Template",
-  description:
-    "Build and deploy AI agents that automate workflows, connect your tools and handle repetitive work with Relay.",
+  metadataBase: new URL("https://knowyouragent.fun"),
+  title: {
+    default: "KYA — Know Your Agent",
+    template: "%s · KYA",
+  },
+  description,
+  applicationName: "KYA",
+  openGraph: {
+    title: "KYA — Know Your Agent",
+    description,
+    url: "https://knowyouragent.fun",
+    siteName: "KYA",
+    type: "website",
+    images: [
+      {
+        url: "/kyamain.png",
+        width: 600,
+        height: 200,
+        alt: "KYA, Know Your Agent",
+      },
+    ],
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#000000",
 };
 
 export default function RootLayout({
@@ -36,11 +62,12 @@ export default function RootLayout({
       lang="en"
       className={`${geistSans.variable} ${geistMono.variable} ${urbanist.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col bg-black text-white">
-        <LenisScroll />
-        <Navbar />
-        {children}
-        <Footer />
+      <body className="min-h-full flex flex-col bg-black text-white overflow-x-clip">
+        <Providers>
+          <Navbar />
+          {children}
+          <Footer />
+        </Providers>
       </body>
     </html>
   );

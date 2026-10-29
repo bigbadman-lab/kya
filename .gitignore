@@ -35,7 +35,7 @@ yarn-error.log*
 # environment files (keep the empty example)
 .env
 .env.*
-!.env.example
+.env*
 
 # vercel
 .vercel
@@ -44,3 +44,4 @@ yarn-error.log*
 _template_review/
 LICENSE.txt
 **/LICENSE.txt
+!.env.example

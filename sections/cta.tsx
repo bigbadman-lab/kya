@@ -1,56 +1,52 @@
 "use client";
 
+import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
-import Animation from "@/components/animation";
 import { motion } from "motion/react";
+import Animation from "@/components/animation";
+import { CornerMarks } from "@/components/corner-marks";
 
 export function CTA() {
   return (
     <section id="cta" className="w-full border-b border-dashed border-zinc-800 relative bg-black">
       <div className="w-full max-w-360 px-4 md:px-16 lg:px-24 xl:px-32 mx-auto">
         <div className="w-full relative border-x border-dashed border-zinc-800 py-24 px-6 md:px-8 lg:px-12 flex flex-col items-center justify-center text-center">
-
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             <Animation />
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_65%_55%_at_50%_50%,rgba(0,0,0,1)_30%,rgba(0,0,0,0.65)_65%,transparent_100%)] z-1" />
           </div>
-
           <div className="relative z-10 flex flex-col items-center mx-auto">
-            <motion.h2 className="text-4xl md:text-[40px] font-medium text-white leading-tight max-w-sm"
+            <motion.h2
+              className="text-4xl md:text-[40px] font-medium text-white leading-tight max-w-sm"
               initial={{ y: 50, opacity: 0 }}
               whileInView={{ y: 0, opacity: 1 }}
               viewport={{ once: true }}
               transition={{ type: "spring", stiffness: 240, damping: 70, mass: 1 }}
             >
-              Ready to Automate your Workflow?
+              Give your agent an identity.
             </motion.h2>
-
-            <motion.p className="text-sm/5.5 text-zinc-400 mt-4 max-w-90"
+            <motion.p
+              className="text-sm/5.5 text-zinc-400 mt-4 max-w-90"
               initial={{ y: 50, opacity: 0 }}
               whileInView={{ y: 0, opacity: 1 }}
               viewport={{ once: true }}
               transition={{ delay: 0.2, type: "spring", stiffness: 240, damping: 70, mass: 1 }}
             >
-              Build your first AI workflow and give your team more time for work that matters.
+              Start a registration record. Domain checks and public listing are the steps that follow.
             </motion.p>
-
-            <motion.button type="button" className="flex items-center gap-1.5 bg-white px-5 py-2.5 text-sm font-medium text-black hover:bg-zinc-200 rounded-sm cursor-pointer mt-9 group"
+            <motion.div
               initial={{ y: 50, opacity: 0 }}
               whileInView={{ y: 0, opacity: 1 }}
               viewport={{ once: true }}
               transition={{ type: "spring", stiffness: 240, damping: 70, mass: 1 }}
             >
-              Start Building
-              <ArrowUpRight size={18} strokeWidth={1.75} className="transition-transform duration-300 ease-out group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
-            </motion.button>
+              <Link href="/register" className="mt-9 inline-flex items-center gap-1.5 bg-white px-5 py-2.5 text-sm font-medium text-black hover:bg-zinc-200 rounded-sm group">
+                Register an Agent
+                <ArrowUpRight size={18} strokeWidth={1.75} className="transition-transform duration-300 ease-out group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+              </Link>
+            </motion.div>
           </div>
-
-          <svg width="10" height="9" viewBox="0 0 10 9" fill="none" xmlns="http://www.w3.org/2000/svg" className="absolute top-full -left-1.25 z-30 pointer-events-none text-zinc-700 fill-zinc-700" >
-            <path d="M0 0L10 0L5 9Z" fill="currentColor" />
-          </svg>
-          <svg width="10" height="9" viewBox="0 0 10 9" fill="none" xmlns="http://www.w3.org/2000/svg" className="absolute top-full -right-1.5 z-30 pointer-events-none text-zinc-700 fill-zinc-700" >
-            <path d="M0 0L10 0L5 9Z" fill="currentColor" />
-          </svg>
+          <CornerMarks />
         </div>
       </div>
     </section>

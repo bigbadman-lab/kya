@@ -1,10 +1,13 @@
 "use client";
 
-import { motion } from "motion/react";
+import { motion, useReducedMotion } from "motion/react";
 
 const TOTAL_LINES = 36;
 
 export function HeroLines() {
+  const reduce = useReducedMotion();
+  if (reduce) return null;
+
   return (
     <div className="absolute inset-0 pointer-events-none overflow-hidden z-0 flex justify-center"
       style={{

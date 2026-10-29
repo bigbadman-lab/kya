@@ -1,6 +1,6 @@
 {
-  "name": "relay - PrebuiltUI",
-  "short_name": "relay",
+  "name": "KYA — Know Your Agent",
+  "short_name": "KYA",
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",
@@ -15,7 +15,7 @@
       "purpose": "maskable"
     }
   ],
-  "theme_color": "#ffffff",
-  "background_color": "#ffffff",
+  "theme_color": "#000000",
+  "background_color": "#000000",
   "display": "standalone"
 }
