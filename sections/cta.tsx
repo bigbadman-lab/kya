@@ -46,7 +46,7 @@ export function CTA() {
                 <ArrowUpRight size={18} strokeWidth={1.75} className="transition-transform duration-300 ease-out group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
               </Link>
             </motion.div>
-            <AgentPromptCta className="relative z-10 mt-8" />
+            <AgentPromptCta className="relative z-10 mt-5" />
           </div>
           <CornerMarks />
         </div>
