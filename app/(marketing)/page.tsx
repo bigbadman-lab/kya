@@ -5,6 +5,7 @@ import { ProductPillars } from "@/sections/product-pillars";
 import { Audiences } from "@/sections/audiences";
 import { RegistryPreview } from "@/sections/registry-preview";
 import CTA from "@/sections/cta";
+import { readOfficialTokenMint } from "@/lib/official-token";
 import { pageMeta } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
@@ -16,10 +17,11 @@ export const metadata = pageMeta({
   path: "/",
 });
 
-export default function HomePage() {
+export default async function HomePage() {
+  const mint = await readOfficialTokenMint();
   return (
     <main className="grow">
-      <HeroSection />
+      <HeroSection mint={mint} />
       <WhatIsKya />
       <HowItWorks />
       <ProductPillars />

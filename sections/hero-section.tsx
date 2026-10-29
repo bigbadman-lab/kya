@@ -5,9 +5,10 @@ import { ArrowUpRight, Sparkle } from "lucide-react";
 import { motion } from "motion/react";
 import Animation from "@/components/animation";
 import { CornerMarks } from "@/components/corner-marks";
+import { TokenMintCopy } from "@/components/token-mint-copy";
 import WarpText from "@/components/warp-text";
 
-export function HeroSection() {
+export function HeroSection({ mint }: { mint?: string | null }) {
   return (
     <motion.section
       className="w-full border-b border-dashed border-zinc-800 relative"
@@ -87,6 +88,7 @@ export function HeroSection() {
               </span>
             </Link>
           </motion.div>
+          {mint ? <TokenMintCopy mint={mint} /> : null}
         </div>
       </div>
     </motion.section>

@@ -47,9 +47,9 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: [{ url: "/kyamain.png", type: "image/png", sizes: "600x200" }],
-    shortcut: ["/kyamain.png"],
-    apple: [{ url: "/kyamain.png", type: "image/png", sizes: "600x200" }],
+    icon: [{ url: "/KYA.png", type: "image/png", sizes: "1254x1254" }],
+    shortcut: ["/KYA.png"],
+    apple: [{ url: "/KYA.png", type: "image/png", sizes: "1254x1254" }],
   },
   openGraph: {
     title: "KYA — Know Your Agent",
