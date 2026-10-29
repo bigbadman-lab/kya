@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { AGENT_CAPABILITIES, AGENT_CATEGORIES, type AgentCapability, type AgentCategory } from "@/lib/identity";
 
 interface FormValues {
@@ -12,8 +13,16 @@ interface FormValues {
   agentCardUrl: string;
 }
 
+interface IssuedIdentity {
+  publicId: string;
+  identityUrl: string;
+  domainVerification: string;
+  managementToken: string;
+  dnsNextStep: string;
+}
+
 type Field = keyof FormValues;
-type Errors = Partial<Record<Field, string>>;
+type Errors = Partial<Record<Field | "form", string>>;
 
 const EMPTY: FormValues = {
   name: "",
@@ -24,28 +33,21 @@ const EMPTY: FormValues = {
   agentCardUrl: "",
 };
 
-function isHttpUrl(value: string) {
-  try {
-    const url = new URL(value);
-    return url.protocol === "http:" || url.protocol === "https:";
-  } catch {
-    return false;
-  }
-}
-
 function validate(values: FormValues): Errors {
   const errors: Errors = {};
-  if (values.name.trim().length < 2) errors.name = "Enter an agent name.";
-  if (values.description.trim().length < 10) {
-    errors.description = "Enter a description of at least 10 characters.";
+  if (values.name.trim().length < 2 || values.name.trim().length > 80) {
+    errors.name = "Enter a name of 2 to 80 characters.";
   }
-  if (!isHttpUrl(values.endpoint.trim())) {
-    errors.endpoint = "Enter a website or endpoint URL starting with http:// or https://.";
+  if (values.description.trim().length < 10 || values.description.trim().length > 500) {
+    errors.description = "Enter a description of 10 to 500 characters.";
+  }
+  if (!values.endpoint.trim().toLowerCase().startsWith("https://")) {
+    errors.endpoint = "Enter an endpoint URL starting with https://.";
   }
   if (!values.category) errors.category = "Select a category.";
   if (values.capabilities.length === 0) errors.capabilities = "Select at least one capability.";
-  if (values.agentCardUrl.trim() && !isHttpUrl(values.agentCardUrl.trim())) {
-    errors.agentCardUrl = "Agent Card URL must start with http:// or https://.";
+  if (values.agentCardUrl.trim() && !values.agentCardUrl.trim().toLowerCase().startsWith("https://")) {
+    errors.agentCardUrl = "Agent Card URL must start with https://.";
   }
   return errors;
 }
@@ -53,11 +55,11 @@ function validate(values: FormValues): Errors {
 export function RegisterForm() {
   const [values, setValues] = useState<FormValues>(EMPTY);
   const [errors, setErrors] = useState<Errors>({});
-  const [unconnected, setUnconnected] = useState(false);
+  const [pending, setPending] = useState(false);
+  const [issued, setIssued] = useState<IssuedIdentity | null>(null);
 
   function update<K extends Field>(key: K, value: FormValues[K]) {
     setValues((current) => ({ ...current, [key]: value }));
-    setUnconnected(false);
   }
 
   function toggleCapability(capability: AgentCapability) {
@@ -70,15 +72,70 @@ export function RegisterForm() {
           : [...current.capabilities, capability],
       };
     });
-    setUnconnected(false);
   }
 
-  function onSubmit(event: React.FormEvent<HTMLFormElement>) {
+  async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const nextErrors = validate(values);
     setErrors(nextErrors);
-    setUnconnected(Object.keys(nextErrors).length === 0);
+    if (Object.keys(nextErrors).length > 0) return;
+
+    setPending(true);
+    try {
+      const response = await fetch("/api/v1/agents/register", {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        cache: "no-store",
+        body: JSON.stringify({
+          name: values.name,
+          description: values.description,
+          endpointUrl: values.endpoint,
+          category: values.category,
+          capabilities: values.capabilities,
+          ...(values.agentCardUrl.trim() ? { agentCardUrl: values.agentCardUrl } : {}),
+        }),
+      });
+      const payload = (await response.json()) as {
+        error?: string;
+        message?: string;
+        fields?: Partial<Record<"name" | "description" | "endpointUrl" | "category" | "capabilities" | "agentCardUrl" | "body", string>>;
+        publicId?: string;
+        identityUrl?: string;
+        domainVerification?: string;
+        managementToken?: string;
+        dnsNextStep?: string;
+      };
+      if (!response.ok) {
+        setErrors({
+          name: payload.fields?.name,
+          description: payload.fields?.description,
+          endpoint: payload.fields?.endpointUrl,
+          category: payload.fields?.category,
+          capabilities: payload.fields?.capabilities,
+          agentCardUrl: payload.fields?.agentCardUrl,
+          form: payload.message || payload.fields?.body || "Registration failed.",
+        });
+        return;
+      }
+      if (!payload.publicId || !payload.identityUrl || !payload.managementToken || !payload.dnsNextStep) {
+        setErrors({ form: "Registration did not return a usable identity." });
+        return;
+      }
+      setIssued({
+        publicId: payload.publicId,
+        identityUrl: payload.identityUrl,
+        domainVerification: payload.domainVerification ?? "unverified",
+        managementToken: payload.managementToken,
+        dnsNextStep: payload.dnsNextStep,
+      });
+    } catch {
+      setErrors({ form: "Registration is unavailable." });
+    } finally {
+      setPending(false);
+    }
   }
+
+  if (issued) return <RegistrationResult issued={issued} />;
 
   return (
     <form className="mt-10 flex max-w-2xl flex-col gap-6" onSubmit={onSubmit} noValidate>
@@ -174,16 +231,77 @@ export function RegisterForm() {
       </Field>
       <button
         type="submit"
-        className="inline-flex w-fit cursor-pointer items-center bg-white px-5 py-2.5 text-sm font-medium text-zinc-800"
+        disabled={pending}
+        className="inline-flex w-fit cursor-pointer items-center bg-white px-5 py-2.5 text-sm font-medium text-zinc-800 disabled:cursor-wait disabled:opacity-70"
       >
-        Submit registration
+        {pending ? "Registering…" : "Submit registration"}
       </button>
-      {unconnected ? (
-        <p className="border border-dashed border-zinc-700 px-4 py-3 text-sm text-zinc-200" role="status">
-          Registration is not connected yet. Nothing was saved.
+      {errors.form ? (
+        <p className="border border-dashed border-zinc-700 px-4 py-3 text-sm text-zinc-200" role="alert">
+          {errors.form}
         </p>
       ) : null}
     </form>
+  );
+}
+
+function RegistrationResult({ issued }: { issued: IssuedIdentity }) {
+  const [copied, setCopied] = useState("");
+
+  async function copyToken() {
+    try {
+      await navigator.clipboard.writeText(issued.managementToken);
+      setCopied("Copied the management token.");
+    } catch {
+      setCopied("Copy is unavailable. Select the token and store it somewhere safe.");
+    }
+  }
+
+  const identityHref = issued.identityUrl;
+
+  return (
+    <div className="mt-10 max-w-2xl border border-dashed border-zinc-800 px-5 py-6">
+      <h2 className="text-2xl font-medium text-white">Identity registered</h2>
+      <p className="mt-3 text-sm/5.5 font-light text-zinc-400">
+        The record is registered and unverified. Domain verification has not run.
+      </p>
+      <p className="mt-4 border border-dashed border-zinc-700 px-4 py-3 text-sm text-zinc-200" role="status">
+        This management token is shown once. Store it somewhere safe before leaving this page. It is not saved in this browser. Refreshing the page hides it, and it cannot be shown again.
+      </p>
+      <dl className="mt-6 space-y-5 text-sm">
+        <div>
+          <dt className="text-xs text-zinc-500">KYA identifier</dt>
+          <dd className="mt-1 break-all font-mono text-zinc-200">{issued.publicId}</dd>
+        </div>
+        <div>
+          <dt className="text-xs text-zinc-500">Public identity URL</dt>
+          <dd className="mt-1 break-all">
+            <Link href={identityHref} className="text-white underline decoration-zinc-700 underline-offset-4">
+              {identityHref}
+            </Link>
+          </dd>
+        </div>
+        <div>
+          <dt className="text-xs text-zinc-500">Domain verification</dt>
+          <dd className="mt-1 text-zinc-200">{issued.domainVerification === "unverified" ? "Unverified" : issued.domainVerification}</dd>
+        </div>
+        <div>
+          <dt className="text-xs text-zinc-500">Management token</dt>
+          <dd className="mt-1 break-all border border-zinc-800 bg-black px-3 py-2 font-mono text-xs text-zinc-200">
+            {issued.managementToken}
+          </dd>
+          <button
+            type="button"
+            onClick={copyToken}
+            className="mt-3 cursor-pointer border border-zinc-800 px-4 py-2 text-sm text-white transition-colors hover:border-zinc-600"
+          >
+            Copy management token
+          </button>
+          {copied ? <p className="mt-2 text-xs text-zinc-400">{copied}</p> : null}
+        </div>
+      </dl>
+      <p className="mt-6 text-sm/5.5 font-light text-zinc-400">{issued.dnsNextStep}</p>
+    </div>
   );
 }
 

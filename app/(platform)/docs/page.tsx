@@ -4,7 +4,7 @@ import { SectionFrame } from "@/components/section-frame";
 
 export const metadata: Metadata = {
   title: "Developers",
-  description: "How public KYA lookup and discovery work, and which interfaces are not yet operational.",
+  description: "How to register a KYA identity over HTTP, and how public lookup and discovery work. DNS verification and MCP are not operational.",
 };
 
 const activeRecord = {
@@ -43,11 +43,11 @@ export default function DocsPage() {
           Developer introduction
         </h1>
         <p className="mt-4 max-w-2xl text-sm/5.5 font-light text-zinc-400">
-          KYA — Know Your Agent. A public identity and discovery layer for AI agents. The website registry and identity pages read live public records. REST and MCP are not operational.
+          KYA — Know Your Agent. A public identity and discovery layer for AI agents. Registration is a public HTTP request. The registry and identity pages read live records. DNS verification and MCP are not operational.
         </p>
         <div className="mt-8 max-w-3xl">
           <DemoNotice>
-            Registration, domain-control checks, REST, and MCP are not available to call. The shapes below describe the public database responses. They are not a live identity.
+            DNS verification and MCP are not available to call. The JSON shapes below describe responses. Placeholder values are not a live identity.
           </DemoNotice>
         </div>
 
@@ -95,10 +95,58 @@ export default function DocsPage() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-medium text-white">REST and MCP</h2>
+            <h2 className="text-2xl font-medium text-white">Register an identity</h2>
+            <p className="mt-2 text-xs text-zinc-500">POST /api/v1/agents/register — live</p>
+            <p className="mt-4">
+              No account, API key, or approval is required. Send JSON. Unknown fields are rejected, including a client-supplied public id, owner, lifecycle, or verification status. The endpoint must be https. The response is not cacheable. The management token is returned once and is not part of the public identity.
+            </p>
+            <pre className="mt-4 overflow-x-auto border border-dashed border-zinc-800 p-4 font-mono text-xs leading-5 text-zinc-300">
+              {`curl -X POST https://knowyouragent.fun/api/v1/agents/register \\
+  -H 'content-type: application/json' \\
+  -d '{"name":"Example agent","description":"A public description of the agent.","endpointUrl":"https://agent.example/agent","category":"Research","capabilities":["search"]}'`}
+            </pre>
+            <h3 className="mt-6 text-base text-zinc-100">Request</h3>
+            <pre className="mt-4 overflow-x-auto border border-dashed border-zinc-800 p-4 font-mono text-xs leading-5 text-zinc-300">
+              {JSON.stringify({
+                name: "Example agent",
+                description: "A public description of the agent.",
+                endpointUrl: "https://agent.example/agent",
+                category: "Research | Commerce | Operations | Developer tools",
+                capabilities: ["search"],
+                agentCardUrl: "https://agent.example/.well-known/agent-card.json",
+              }, null, 2)}
+            </pre>
+            <p className="mt-4"><span className="font-mono text-zinc-200">agentCardUrl</span> is optional. The body limit is 8 KB.</p>
+            <h3 className="mt-6 text-base text-zinc-100">201 response</h3>
+            <pre className="mt-4 overflow-x-auto border border-dashed border-zinc-800 p-4 font-mono text-xs leading-5 text-zinc-300">
+              {JSON.stringify({
+                publicId: "kya_…",
+                identityUrl: "/agents/kya_…",
+                domainVerification: "unverified",
+                registered: true,
+                managementToken: "kya_mgmt_…",
+                credentialPrefix: "kya_mgmt_…",
+                dnsNextStep: "Domain verification is not available yet.",
+              }, null, 2)}
+            </pre>
+            <p className="mt-4">
+              Store the management token. It is the credential for later management of this one identity. The public lookup does not return it. Registered means the record exists. Domain verified is a later control check and is not granted by registration.
+            </p>
+            <h3 className="mt-6 text-base text-zinc-100">Errors</h3>
+            <ul className="mt-4 space-y-3">
+              <li><span className="font-mono text-zinc-200">400</span> — invalid JSON, content type, field, or an unsupported property.</li>
+              <li><span className="font-mono text-zinc-200">405</span> — GET does not register an identity.</li>
+              <li><span className="font-mono text-zinc-200">429</span> — the address, network, or global registration limit was reached.</li>
+              <li><span className="font-mono text-zinc-200">503</span> — the client address or the registration service is unavailable. No identity is created.</li>
+            </ul>
+            <p className="mt-4">Error bodies use <span className="font-mono text-zinc-200">{`{ "error": "kya_…" }`}</span> and do not include a token or a database detail.</p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-medium text-white">DNS verification and MCP</h2>
             <p className="mt-2 text-xs text-zinc-500">Not operational</p>
             <p className="mt-4">
-              No public REST route and no MCP server are available. Do not call a registration, challenge, or management endpoint. The registration form and dashboard on this website are not connected to those operations.
+              There is no route to issue or complete a DNS challenge, rotate a credential, or call an MCP tool. Do not send a management token to an endpoint that is not documented as live. The only live write route is registration.
             </p>
           </section>
         </article>

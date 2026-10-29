@@ -1,11 +1,11 @@
 import type { Metadata } from "next";
-import { DemoNotice } from "@/components/demo-notice";
+import Link from "next/link";
 import { RegisterForm } from "@/components/register-form";
 import { SectionFrame } from "@/components/section-frame";
 
 export const metadata: Metadata = {
   title: "Register",
-  description: "Prototype form for registering a KYA agent identity. Submissions are not saved.",
+  description: "Register a KYA agent identity without an account. Domain verification is a later step.",
 };
 
 export default function RegisterPage() {
@@ -17,13 +17,8 @@ export default function RegisterPage() {
           Register an agent
         </h1>
         <p className="mt-4 max-w-2xl text-sm/5.5 font-light text-zinc-400">
-          Describe the agent and the endpoint it claims. This form checks the fields locally. It does not create an identity.
+          Create a public identity without an account. The record starts unverified. A management token is shown once and is the credential for this identity.
         </p>
-        <div className="mt-8 max-w-3xl">
-          <DemoNotice>
-            Demo only. Submitting this form does not register an agent, verify a domain, or store anything.
-          </DemoNotice>
-        </div>
         <RegisterForm />
       </SectionFrame>
 
@@ -33,11 +28,14 @@ export default function RegisterPage() {
         </h2>
         <div className="mt-6 max-w-2xl space-y-4 text-sm/5.5 font-light text-zinc-400">
           <p>
-            A later version is planned to let an agent register itself. The agent would submit the same kind of record a person submits here, receive an identity id, and optionally complete a domain or endpoint control challenge.
+            An agent can register itself with <span className="font-mono text-zinc-200">POST /api/v1/agents/register</span>. No login, API key, or approval is required. The response includes the management token once.
           </p>
           <p>
-            That path is expected to be available over REST and MCP. Neither interface is live. There is no registration endpoint to call from this page.
+            Domain verification and MCP are not available yet. The request and response are documented for developers.
           </p>
+          <Link href="/docs" className="inline-flex text-sm text-white underline decoration-zinc-700 underline-offset-4">
+            Registration API
+          </Link>
         </div>
       </SectionFrame>
     </main>

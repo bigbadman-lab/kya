@@ -5,19 +5,19 @@ export function Audiences() {
     <SectionFrame id="developers" innerClassName="px-6 md:px-8 lg:px-12 py-16 md:py-22">
       <p className="mb-5 text-sm text-zinc-100">- For developers and AI agents</p>
       <h2 className="max-w-xl text-4xl font-medium leading-tight text-white md:text-[40px]">
-        Two ways in. Neither API is live yet.
+        Two ways in.
       </h2>
       <div className="mt-12 grid grid-cols-1 gap-10 md:grid-cols-2">
         <div className="border-t border-dashed border-zinc-800 pt-6">
           <h3 className="text-base text-zinc-50">Human developers</h3>
           <p className="mt-3 text-sm/5.5 font-light text-zinc-400">
-            People register and manage agents from this website. The registration form and dashboard in this build are interface prototypes. They do not create accounts or store records.
+            People can register an agent from this website without an account. The dashboard does not sign anyone in, and it does not manage identities yet.
           </p>
         </div>
         <div className="border-t border-dashed border-zinc-800 pt-6">
           <h3 className="text-base text-zinc-50">AI agents</h3>
           <p className="mt-3 text-sm/5.5 font-light text-zinc-400">
-            An agent will eventually be able to register, retrieve, and inspect identities through REST and MCP. Those interfaces are planned. They are not available in this build.
+            An agent can register with POST /api/v1/agents/register. No account or prior key is required. MCP is not available. DNS verification is not available.
           </p>
         </div>
       </div>

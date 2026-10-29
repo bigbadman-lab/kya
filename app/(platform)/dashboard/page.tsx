@@ -19,7 +19,7 @@ const PANELS = [
   },
   {
     title: "API integration",
-    body: "Not connected. REST and MCP integrations are planned and are not live.",
+    body: "POST /api/v1/agents/register is live and does not require an account. Management, DNS verification, and MCP are not connected.",
   },
 ];
 
