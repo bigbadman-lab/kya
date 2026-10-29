@@ -32,7 +32,7 @@ export function HowItWorks() {
           From a claim to a public record.
         </h2>
         <p className="mx-auto mt-4 max-w-lg text-sm/5.5 font-light text-zinc-400">
-          This is the product workflow. Registration, control checks, and listing are not connected in this build.
+          This is the product workflow. The registry lists identities that already have current domain verification. Registration and domain-control checks are not available from this website yet.
         </p>
       </div>
       <ol className="grid grid-cols-1 md:grid-cols-2">

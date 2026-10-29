@@ -11,7 +11,7 @@ export function CopyIdentityUrl({ path }: { path: string }) {
     try {
       await navigator.clipboard.writeText(url);
       setManualUrl("");
-      setMessage("Copied the address of this sample page.");
+      setMessage("Copied the identity URL.");
     } catch {
       setManualUrl(url);
       setMessage("Copy is unavailable in this browser. Select the address below.");
@@ -36,7 +36,7 @@ export function CopyIdentityUrl({ path }: { path: string }) {
         <input
           readOnly
           value={manualUrl}
-          aria-label="Sample identity URL"
+          aria-label="Identity URL"
           className="mt-2 w-full border border-zinc-800 bg-black px-3 py-2 font-mono text-xs text-zinc-300"
           onFocus={(event) => event.currentTarget.select()}
         />

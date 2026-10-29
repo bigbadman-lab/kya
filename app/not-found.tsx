@@ -10,14 +10,14 @@ export default function NotFound() {
           Page not found
         </h1>
         <p className="mt-4 max-w-xl text-sm/5.5 font-light text-zinc-400">
-          That page is not in this build. Unknown sample agent ids are not live identities.
+          That page is not available. An unknown identity address is not a public record.
         </p>
         <div className="mt-8 flex flex-wrap gap-x-6 gap-y-3 text-sm">
           <Link href="/" className="text-white underline decoration-zinc-700 underline-offset-4">
             Home
           </Link>
           <Link href="/agents" className="text-white underline decoration-zinc-700 underline-offset-4">
-            Sample registry
+            Registry
           </Link>
         </div>
       </SectionFrame>

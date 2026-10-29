@@ -6,6 +6,8 @@ import { Audiences } from "@/sections/audiences";
 import { RegistryPreview } from "@/sections/registry-preview";
 import CTA from "@/sections/cta";
 
+export const dynamic = "force-dynamic";
+
 export default function HomePage() {
   return (
     <main className="grow">

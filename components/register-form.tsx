@@ -1,14 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { DEMO_CAPABILITIES, DEMO_CATEGORIES, type DemoCapability, type DemoCategory } from "@/data/demo-agents";
+import { AGENT_CAPABILITIES, AGENT_CATEGORIES, type AgentCapability, type AgentCategory } from "@/lib/identity";
 
 interface FormValues {
   name: string;
   description: string;
   endpoint: string;
-  category: "" | DemoCategory;
-  capabilities: DemoCapability[];
+  category: "" | AgentCategory;
+  capabilities: AgentCapability[];
   agentCardUrl: string;
 }
 
@@ -60,7 +60,7 @@ export function RegisterForm() {
     setUnconnected(false);
   }
 
-  function toggleCapability(capability: DemoCapability) {
+  function toggleCapability(capability: AgentCapability) {
     setValues((current) => {
       const has = current.capabilities.includes(capability);
       return {
@@ -129,7 +129,7 @@ export function RegisterForm() {
           className={inputClass}
         >
           <option value="">Select a category</option>
-          {DEMO_CATEGORIES.map((category) => (
+          {AGENT_CATEGORIES.map((category) => (
             <option key={category} value={category}>
               {category}
             </option>
@@ -139,7 +139,7 @@ export function RegisterForm() {
       <fieldset aria-describedby={errors.capabilities ? "agent-capabilities-error" : undefined}>
         <legend className="text-sm text-zinc-200">Capabilities</legend>
         <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-          {DEMO_CAPABILITIES.map((capability) => (
+          {AGENT_CAPABILITIES.map((capability) => (
             <label key={capability} className="flex items-center gap-2 text-sm text-zinc-300">
               <input
                 type="checkbox"

@@ -1,29 +1,40 @@
 import type { Metadata } from "next";
 import { DemoNotice } from "@/components/demo-notice";
 import { SectionFrame } from "@/components/section-frame";
-import { DEMO_AGENTS } from "@/data/demo-agents";
 
 export const metadata: Metadata = {
   title: "Developers",
-  description: "What a KYA identity is, how registration differs from domain control, and which APIs are planned.",
+  description: "How public KYA lookup and discovery work, and which interfaces are not yet operational.",
+};
+
+const activeRecord = {
+  publicId: "kya_…",
+  identityUrl: "/agents/kya_…",
+  name: "string",
+  description: "string",
+  category: "Research | Commerce | Operations | Developer tools",
+  capabilities: ["search", "summarize", "scheduling", "checkout", "code-review", "monitoring"],
+  endpointUrl: "https://…",
+  claimedHost: "hostname",
+  lifecycle: "active",
+  domainVerification: "verified | unverified | expired",
+  verificationExpiresAt: "timestamptz or null",
+  registered: true,
+};
+
+const tombstone = {
+  publicId: "kya_…",
+  identityUrl: "/agents/kya_…",
+  lifecycle: "suspended | revoked",
+  registered: true,
+};
+
+const searchResult = {
+  agents: ["active identity records"],
+  nextCursor: "timestamptz or null",
 };
 
 export default function DocsPage() {
-  const sample = DEMO_AGENTS[0];
-  const record = {
-    id: sample.identityId,
-    name: sample.name,
-    description: sample.description,
-    claimedDomain: sample.claimedDomain,
-    endpoint: sample.endpoint,
-    category: sample.category,
-    capabilities: sample.capabilities,
-    registration: "registered",
-    domainControl: "simulated_pass",
-    safetyAssessment: null,
-    illustrative: true,
-  };
-
   return (
     <main className="grow">
       <SectionFrame innerClassName="px-6 md:px-8 lg:px-12 py-16 md:py-22">
@@ -32,11 +43,11 @@ export default function DocsPage() {
           Developer introduction
         </h1>
         <p className="mt-4 max-w-2xl text-sm/5.5 font-light text-zinc-400">
-          KYA — Know Your Agent. A public identity and discovery layer for AI agents. The interfaces below are the planned shape of the product. They are not deployed.
+          KYA — Know Your Agent. A public identity and discovery layer for AI agents. The website registry and identity pages read live public records. REST and MCP are not operational.
         </p>
         <div className="mt-8 max-w-3xl">
           <DemoNotice>
-            Every route described on this page is planned, not live. Do not call them. This build has no API.
+            Registration, domain-control checks, REST, and MCP are not available to call. The shapes below describe the public database responses. They are not a live identity.
           </DemoNotice>
         </div>
 
@@ -52,42 +63,43 @@ export default function DocsPage() {
             <h2 className="text-2xl font-medium text-white">Registered vs domain verified</h2>
             <ul className="mt-4 space-y-3">
               <li>Registered means the identity record exists.</li>
-              <li>Domain verified means a defined challenge showed control of the claimed domain or endpoint.</li>
-              <li>An agent can be registered without being domain verified.</li>
+              <li>Domain verified means a defined challenge showed control of the claimed domain and that result has not expired.</li>
+              <li>An agent can be registered without being domain verified. A direct identity address still resolves it.</li>
               <li>Neither status proves the agent is safe, trustworthy, legally identified, or currently operating as described.</li>
             </ul>
           </section>
 
           <section>
-            <h2 className="text-2xl font-medium text-white">Planned registration and lookup</h2>
-            <p className="mt-2 text-xs text-zinc-500">Planned — not live</p>
-            <ol className="mt-4 list-decimal space-y-3 pl-5">
-              <li>A person, or later an agent, submits the same fields as the registration form.</li>
-              <li>KYA would return a persistent identity id. That response does not exist yet.</li>
-              <li>The registrant may then run a domain or endpoint control challenge. The challenge is not implemented.</li>
-              <li>Anyone could later look up the identity by id and read the public record. Lookup is not implemented.</li>
-            </ol>
+            <h2 className="text-2xl font-medium text-white">Public lookup</h2>
             <p className="mt-4">
-              No host, path, or method on this page is an operational endpoint. The website routes for the sample registry, the registration form, and this document are interface prototypes only.
+              Open <span className="text-zinc-200">/agents/</span> followed by the public id. The page calls <span className="font-mono text-zinc-200">lookup_public_agent(p_public_id)</span>. Verification is evaluated in the database at read time. An unknown id is not found. A suspended or revoked identity returns only the tombstone. The response does not include an owner id, credential, challenge, or private event.
             </p>
+            <h3 className="mt-6 text-base text-zinc-100">Active identity</h3>
+            <pre className="mt-4 overflow-x-auto border border-dashed border-zinc-800 p-4 font-mono text-xs leading-5 text-zinc-300">
+              {JSON.stringify(activeRecord, null, 2)}
+            </pre>
+            <h3 className="mt-6 text-base text-zinc-100">Suspended or revoked tombstone</h3>
+            <pre className="mt-4 overflow-x-auto border border-dashed border-zinc-800 p-4 font-mono text-xs leading-5 text-zinc-300">
+              {JSON.stringify(tombstone, null, 2)}
+            </pre>
           </section>
 
           <section>
-            <h2 className="text-2xl font-medium text-white">Planned MCP integration</h2>
-            <p className="mt-2 text-xs text-zinc-500">Planned — not live</p>
+            <h2 className="text-2xl font-medium text-white">Public discovery</h2>
             <p className="mt-4">
-              A later phase may expose MCP tools so an agent can register an identity, retrieve a record, and read a control-check result. No MCP server is running in this build, and no tool names here can be called.
-            </p>
-          </section>
-
-          <section>
-            <h2 className="text-2xl font-medium text-white">Illustrative identity record</h2>
-            <p className="mt-4">
-              This JSON is shaped like a future public record and is filled with the Harbor sample. It is not a response from a service.
+              <span className="text-zinc-200">/agents</span> calls <span className="font-mono text-zinc-200">search_public_agents(p_query, p_category, p_cursor, p_limit)</span>. Results are active identities whose domain verification is still current, newest first. Unverified, expired, suspended, and revoked identities are omitted. There is no unverified filter. Categories are Research, Commerce, Operations, and Developer tools. Each page holds at most 20 records. <span className="font-mono text-zinc-200">nextCursor</span> is the oldest timestamp on a full page, or null.
             </p>
             <pre className="mt-4 overflow-x-auto border border-dashed border-zinc-800 p-4 font-mono text-xs leading-5 text-zinc-300">
-              {JSON.stringify(record, null, 2)}
+              {JSON.stringify(searchResult, null, 2)}
             </pre>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-medium text-white">REST and MCP</h2>
+            <p className="mt-2 text-xs text-zinc-500">Not operational</p>
+            <p className="mt-4">
+              No public REST route and no MCP server are available. Do not call a registration, challenge, or management endpoint. The registration form and dashboard on this website are not connected to those operations.
+            </p>
           </section>
         </article>
       </SectionFrame>
