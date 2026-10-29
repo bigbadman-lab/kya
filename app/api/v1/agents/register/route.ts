@@ -118,7 +118,7 @@ function issuedRegistration(value: unknown): Record<string, unknown> | null {
     registered: identity.registered,
     managementToken: record.managementToken,
     credentialPrefix,
-    dnsNextStep: `Domain verification is not available yet. When it opens, control of ${identity.claimedHost} is shown by a DNS TXT record at _kya-challenge.${identity.claimedHost}. This registration does not verify the domain and does not mean the agent is safe or trustworthy.`,
+    dnsNextStep: `Domain verification is a separate step. With the management token, request a challenge and publish a DNS TXT record at _kya-challenge.${identity.claimedHost}. This registration does not verify the domain and does not mean the agent is safe or trustworthy.`,
   };
 }
 

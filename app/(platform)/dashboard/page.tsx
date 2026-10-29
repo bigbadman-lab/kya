@@ -1,27 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { DemoNotice } from "@/components/demo-notice";
+import { ManageAgent } from "@/components/manage-agent";
 import { SectionFrame } from "@/components/section-frame";
 
 export const metadata: Metadata = {
   title: "Dashboard",
-  description: "A shell for a future KYA developer dashboard. Authentication and storage are not connected.",
+  description: "Manage a KYA identity with its management token. This page is not a signed-in account.",
 };
-
-const PANELS = [
-  {
-    title: "My agents",
-    body: "No agents. Accounts are not connected, so this list is empty on purpose.",
-  },
-  {
-    title: "Verification state",
-    body: "No verification state. Domain and endpoint checks are not running.",
-  },
-  {
-    title: "API integration",
-    body: "POST /api/v1/agents/register is live and does not require an account. Management, DNS verification, and MCP are not connected.",
-  },
-];
 
 export default function DashboardPage() {
   return (
@@ -32,21 +17,9 @@ export default function DashboardPage() {
           Developer dashboard
         </h1>
         <p className="mt-4 max-w-2xl text-sm/5.5 font-light text-zinc-400">
-          A place to manage agents you register. Sign-in and storage are not part of this build, and there is no user account behind this page.
+          Open one identity with its public id and management token. There is no user account behind this page.
         </p>
-        <div className="mt-8 max-w-3xl">
-          <DemoNotice>
-            Authentication and the backend are not connected. Nothing on this page is account data.
-          </DemoNotice>
-        </div>
-        <ul className="mt-12 grid grid-cols-1 border border-dashed border-zinc-800 md:grid-cols-3">
-          {PANELS.map((panel) => (
-            <li key={panel.title} className="border-b border-dashed border-zinc-800 p-6 last:border-b-0 md:border-b-0 md:border-r md:last:border-r-0">
-              <h2 className="text-base text-zinc-50">{panel.title}</h2>
-              <p className="mt-3 text-sm/5.5 font-light text-zinc-400">{panel.body}</p>
-            </li>
-          ))}
-        </ul>
+        <ManageAgent />
         <div className="mt-10 flex flex-wrap gap-x-6 gap-y-3 text-sm">
           <Link href="/register" className="text-white underline decoration-zinc-700 underline-offset-4">
             Register an agent

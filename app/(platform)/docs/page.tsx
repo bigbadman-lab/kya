@@ -4,7 +4,7 @@ import { SectionFrame } from "@/components/section-frame";
 
 export const metadata: Metadata = {
   title: "Developers",
-  description: "How to register a KYA identity over HTTP, and how public lookup and discovery work. DNS verification and MCP are not operational.",
+  description: "How to register a KYA identity, verify a domain, and manage it with a bearer token. MCP is not operational.",
 };
 
 const activeRecord = {
@@ -43,11 +43,11 @@ export default function DocsPage() {
           Developer introduction
         </h1>
         <p className="mt-4 max-w-2xl text-sm/5.5 font-light text-zinc-400">
-          KYA — Know Your Agent. A public identity and discovery layer for AI agents. Registration is a public HTTP request. The registry and identity pages read live records. DNS verification and MCP are not operational.
+          KYA — Know Your Agent. A public identity and discovery layer for AI agents. Registration is a public HTTP request. Management and DNS verification use the management token. MCP is not operational.
         </p>
         <div className="mt-8 max-w-3xl">
           <DemoNotice>
-            DNS verification and MCP are not available to call. The JSON shapes below describe responses. Placeholder values are not a live identity.
+            Placeholder values below are not a live identity or a live token. MCP is not available to call.
           </DemoNotice>
         </div>
 
@@ -126,7 +126,7 @@ export default function DocsPage() {
                 registered: true,
                 managementToken: "kya_mgmt_…",
                 credentialPrefix: "kya_mgmt_…",
-                dnsNextStep: "Domain verification is not available yet.",
+                dnsNextStep: "Request a challenge, then publish the TXT record.",
               }, null, 2)}
             </pre>
             <p className="mt-4">
@@ -143,10 +143,84 @@ export default function DocsPage() {
           </section>
 
           <section>
-            <h2 className="text-2xl font-medium text-white">DNS verification and MCP</h2>
+            <h2 className="text-2xl font-medium text-white">Management authentication</h2>
+            <p className="mt-2 text-xs text-zinc-500">Bearer token — live</p>
+            <p className="mt-4">
+              Send <span className="font-mono text-zinc-200">Authorization: Bearer</span> with the management token. No human login is required. The token is scoped to one identity. A token for a different identity is rejected. Do not put the token in a URL. Responses send <span className="font-mono text-zinc-200">Cache-Control: no-store</span>.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-medium text-white">Update a profile</h2>
+            <p className="mt-2 text-xs text-zinc-500">PATCH /api/v1/agents/{"{publicId}"} — live</p>
+            <pre className="mt-4 overflow-x-auto border border-dashed border-zinc-800 p-4 font-mono text-xs leading-5 text-zinc-300">
+              {`curl -X PATCH https://knowyouragent.fun/api/v1/agents/kya_… \\
+  -H 'authorization: Bearer kya_mgmt_…' \\
+  -H 'content-type: application/json' \\
+  -d '{"name":"Example agent","description":"A public description of the agent.","endpointUrl":"https://agent.example/agent","category":"Research","capabilities":["search"]}'`}
+            </pre>
+            <p className="mt-4">
+              The body uses the same fields as registration. Changing the endpoint hostname clears domain verification. The response is the public profile.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-medium text-white">DNS challenge</h2>
+            <p className="mt-2 text-xs text-zinc-500">POST /api/v1/agents/{"{publicId}"}/challenges — live</p>
+            <pre className="mt-4 overflow-x-auto border border-dashed border-zinc-800 p-4 font-mono text-xs leading-5 text-zinc-300">
+              {`curl -X POST https://knowyouragent.fun/api/v1/agents/kya_…/challenges \\
+  -H 'authorization: Bearer kya_mgmt_…' \\
+  -H 'content-type: application/json' \\
+  -d '{"method":"dns_txt"}'`}
+            </pre>
+            <p className="mt-4">
+              A 201 response includes <span className="font-mono text-zinc-200">txtName</span>, <span className="font-mono text-zinc-200">publishedToken</span>, and <span className="font-mono text-zinc-200">expiresAt</span>. Publish a TXT record at <span className="font-mono text-zinc-200">_kya-challenge.your-host</span> whose value is the published token. The challenge lasts 15 minutes. Issuing another one expires the pending challenge. The identity stays unverified until completion succeeds.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-medium text-white">Complete DNS verification</h2>
+            <p className="mt-2 text-xs text-zinc-500">POST /api/v1/agents/{"{publicId}"}/challenges/{"{challengeId}"}/complete — live</p>
+            <pre className="mt-4 overflow-x-auto border border-dashed border-zinc-800 p-4 font-mono text-xs leading-5 text-zinc-300">
+              {`curl -X POST https://knowyouragent.fun/api/v1/agents/kya_…/challenges/CHALLENGE_ID/complete \\
+  -H 'authorization: Bearer kya_mgmt_…' \\
+  -H 'content-type: application/json' \\
+  -d '{}'`}
+            </pre>
+            <p className="mt-4">
+              KYA resolves the TXT record. Do not send DNS results in the body. A match marks the identity domain-verified for 90 days and the challenge cannot be reused. A missing or wrong record leaves the identity unverified. A missing record can be retried until the challenge expires. Domain verified means host control only. It is not proof of safety, operator identity, or runtime authenticity. Verified identities can appear in the registry. Unverified identities stay available by direct URL and stay out of search.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-medium text-white">Rotate or revoke</h2>
+            <p className="mt-2 text-xs text-zinc-500">Credential and lifecycle — live</p>
+            <pre className="mt-4 overflow-x-auto border border-dashed border-zinc-800 p-4 font-mono text-xs leading-5 text-zinc-300">
+              {`curl -X POST https://knowyouragent.fun/api/v1/agents/kya_…/credentials/rotate \\
+  -H 'authorization: Bearer kya_mgmt_…' \\
+  -H 'content-type: application/json' \\
+  -d '{}'`}
+            </pre>
+            <p className="mt-4">
+              Rotation returns a new management token once and invalidates the previous one. There is no recovery for a lost token. <span className="font-mono text-zinc-200">POST /credentials/revoke</span> disables the credential. <span className="font-mono text-zinc-200">POST /suspend</span>, <span className="font-mono text-zinc-200">/reinstate</span>, and <span className="font-mono text-zinc-200">/revoke</span> change lifecycle. Revoking an identity is terminal. Account linking is not available.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-medium text-white">Registration to verification</h2>
+            <ol className="mt-4 list-decimal space-y-3 pl-5">
+              <li>POST /api/v1/agents/register and store the management token.</li>
+              <li>POST /api/v1/agents/{"{publicId}"}/challenges with the bearer token.</li>
+              <li>Publish the TXT record at the returned name.</li>
+              <li>POST the complete route. The public profile then reports domain verified, and search can list it until the 90-day expiry.</li>
+            </ol>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-medium text-white">MCP</h2>
             <p className="mt-2 text-xs text-zinc-500">Not operational</p>
             <p className="mt-4">
-              There is no route to issue or complete a DNS challenge, rotate a credential, or call an MCP tool. Do not send a management token to an endpoint that is not documented as live. The only live write route is registration.
+              MCP is planned. There is no MCP tool to call. Do not send a management token to an endpoint that is not documented here.
             </p>
           </section>
         </article>

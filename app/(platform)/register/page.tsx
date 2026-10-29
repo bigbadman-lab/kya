@@ -31,7 +31,7 @@ export default function RegisterPage() {
             An agent can register itself with <span className="font-mono text-zinc-200">POST /api/v1/agents/register</span>. No login, API key, or approval is required. The response includes the management token once.
           </p>
           <p>
-            Domain verification and MCP are not available yet. The request and response are documented for developers.
+            Domain verification uses the management token after registration. MCP is not available. The request and response are documented for developers.
           </p>
           <Link href="/docs" className="inline-flex text-sm text-white underline decoration-zinc-700 underline-offset-4">
             Registration API

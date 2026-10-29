@@ -32,7 +32,7 @@ export function HowItWorks() {
           From a claim to a public record.
         </h2>
         <p className="mx-auto mt-4 max-w-lg text-sm/5.5 font-light text-zinc-400">
-          This is the product workflow. Register an identity here or through the registration API. The registry lists identities with current domain verification. Domain-control checks are not available yet.
+          This is the product workflow. Register an identity here or through the registration API. Prove control of the claimed host with a DNS TXT challenge, then the registry can list it.
         </p>
       </div>
       <ol className="grid grid-cols-1 md:grid-cols-2">
