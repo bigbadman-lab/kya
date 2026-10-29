@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { AGENT_CAPABILITIES, AGENT_CATEGORIES, type AgentCapability, type AgentCategory } from "@/lib/identity";
 
@@ -52,11 +52,35 @@ function validate(values: FormValues): Errors {
   return errors;
 }
 
+const STEPS = [
+  { title: "Profile", prompt: "What should people call this agent?" },
+  { title: "Endpoint", prompt: "Where does it live, and what can it do?" },
+  { title: "Create", prompt: "Check the record. It starts unverified." },
+] as const;
+
+function stepFor(nextErrors: Errors): number {
+  if (nextErrors.name || nextErrors.description) return 0;
+  if (nextErrors.endpoint || nextErrors.category || nextErrors.capabilities) return 1;
+  return 2;
+}
+
 export function RegisterForm() {
   const [values, setValues] = useState<FormValues>(EMPTY);
   const [errors, setErrors] = useState<Errors>({});
   const [pending, setPending] = useState(false);
   const [issued, setIssued] = useState<IssuedIdentity | null>(null);
+  const [step, setStep] = useState(0);
+  const panelRef = useRef<HTMLDivElement>(null);
+  const opened = useRef(false);
+
+  useEffect(() => {
+    if (!opened.current) {
+      opened.current = true;
+      return;
+    }
+    panelRef.current?.focus();
+    panelRef.current?.scrollIntoView({ block: "nearest" });
+  }, [step, issued]);
 
   function update<K extends Field>(key: K, value: FormValues[K]) {
     setValues((current) => ({ ...current, [key]: value }));
@@ -74,11 +98,35 @@ export function RegisterForm() {
     });
   }
 
+  function continueStep() {
+    const nextErrors = validate(values);
+    const visible: Errors = {};
+    if (step === 0) {
+      if (nextErrors.name) visible.name = nextErrors.name;
+      if (nextErrors.description) visible.description = nextErrors.description;
+    }
+    if (step === 1) {
+      if (nextErrors.endpoint) visible.endpoint = nextErrors.endpoint;
+      if (nextErrors.category) visible.category = nextErrors.category;
+      if (nextErrors.capabilities) visible.capabilities = nextErrors.capabilities;
+    }
+    setErrors(visible);
+    if (Object.keys(visible).length > 0) return;
+    setStep((current) => Math.min(current + 1, STEPS.length - 1));
+  }
+
   async function onSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (step < STEPS.length - 1) {
+      continueStep();
+      return;
+    }
     const nextErrors = validate(values);
     setErrors(nextErrors);
-    if (Object.keys(nextErrors).length > 0) return;
+    if (Object.keys(nextErrors).length > 0) {
+      setStep(stepFor(nextErrors));
+      return;
+    }
 
     setPending(true);
     try {
@@ -106,7 +154,7 @@ export function RegisterForm() {
         dnsNextStep?: string;
       };
       if (!response.ok) {
-        setErrors({
+        const nextErrors: Errors = {
           name: payload.fields?.name,
           description: payload.fields?.description,
           endpoint: payload.fields?.endpointUrl,
@@ -114,7 +162,9 @@ export function RegisterForm() {
           capabilities: payload.fields?.capabilities,
           agentCardUrl: payload.fields?.agentCardUrl,
           form: payload.message || payload.fields?.body || "Registration failed.",
-        });
+        };
+        setErrors(nextErrors);
+        setStep(stepFor(nextErrors));
         return;
       }
       if (!payload.publicId || !payload.identityUrl || !payload.managementToken || !payload.dnsNextStep) {
@@ -135,117 +185,195 @@ export function RegisterForm() {
     }
   }
 
-  if (issued) return <RegistrationResult issued={issued} />;
+  if (issued) return <RegistrationResult issued={issued} panelRef={panelRef} />;
 
   return (
-    <form className="mt-10 flex max-w-2xl flex-col gap-6" onSubmit={onSubmit} noValidate>
-      <Field label="Agent name" htmlFor="agent-name" error={errors.name}>
-        <input
-          id="agent-name"
-          name="name"
-          value={values.name}
-          onChange={(event) => update("name", event.target.value)}
-          aria-invalid={Boolean(errors.name)}
-          aria-describedby={errors.name ? "agent-name-error" : undefined}
-          className={inputClass}
-        />
-      </Field>
-      <Field label="Description" htmlFor="agent-description" error={errors.description}>
-        <textarea
-          id="agent-description"
-          name="description"
-          rows={4}
-          value={values.description}
-          onChange={(event) => update("description", event.target.value)}
-          aria-invalid={Boolean(errors.description)}
-          aria-describedby={errors.description ? "agent-description-error" : undefined}
-          className={inputClass}
-        />
-      </Field>
-      <Field label="Website / agent endpoint" htmlFor="agent-endpoint" error={errors.endpoint}>
-        <input
-          id="agent-endpoint"
-          name="endpoint"
-          inputMode="url"
-          placeholder="https://"
-          value={values.endpoint}
-          onChange={(event) => update("endpoint", event.target.value)}
-          aria-invalid={Boolean(errors.endpoint)}
-          aria-describedby={errors.endpoint ? "agent-endpoint-error" : undefined}
-          className={inputClass}
-        />
-      </Field>
-      <Field label="Category" htmlFor="agent-category" error={errors.category}>
-        <select
-          id="agent-category"
-          name="category"
-          value={values.category}
-          onChange={(event) => update("category", event.target.value as FormValues["category"])}
-          aria-invalid={Boolean(errors.category)}
-          aria-describedby={errors.category ? "agent-category-error" : undefined}
-          className={inputClass}
-        >
-          <option value="">Select a category</option>
-          {AGENT_CATEGORIES.map((category) => (
-            <option key={category} value={category}>
-              {category}
-            </option>
-          ))}
-        </select>
-      </Field>
-      <fieldset aria-describedby={errors.capabilities ? "agent-capabilities-error" : undefined}>
-        <legend className="text-sm text-zinc-200">Capabilities</legend>
-        <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
-          {AGENT_CAPABILITIES.map((capability) => (
-            <label key={capability} className="flex items-center gap-2 text-sm text-zinc-300">
-              <input
-                type="checkbox"
-                name="capabilities"
-                value={capability}
-                checked={values.capabilities.includes(capability)}
-                onChange={() => toggleCapability(capability)}
-                className="accent-white"
-              />
-              {capability}
-            </label>
-          ))}
+    <form className="mt-10 max-w-2xl" onSubmit={onSubmit} noValidate>
+      <ol className="grid grid-cols-3 gap-3" aria-label="Registration progress">
+        {STEPS.map((item, index) => (
+          <li key={item.title}>
+            <p className={`text-xs ${index === step ? "text-white" : index < step ? "text-zinc-300" : "text-zinc-600"}`}>
+              {index + 1}. {item.title}
+            </p>
+            <span className={`mt-2 block h-px ${index <= step ? "bg-white" : "bg-zinc-800"}`} />
+          </li>
+        ))}
+      </ol>
+
+      <div key={step} ref={panelRef} tabIndex={-1} className="kya-step mt-8 scroll-mt-24 outline-none">
+        <h2 className="text-2xl font-medium text-white">{STEPS[step].prompt}</h2>
+        <div className="mt-6 flex flex-col gap-6">
+          {step === 0 ? (
+            <>
+              <Field label="Agent name" htmlFor="agent-name" error={errors.name}>
+                <input
+                  id="agent-name"
+                  name="name"
+                  value={values.name}
+                  onChange={(event) => update("name", event.target.value)}
+                  aria-invalid={Boolean(errors.name)}
+                  aria-describedby={errors.name ? "agent-name-error" : undefined}
+                  className={inputClass}
+                />
+              </Field>
+              <Field label="Description" htmlFor="agent-description" error={errors.description}>
+                <textarea
+                  id="agent-description"
+                  name="description"
+                  rows={4}
+                  value={values.description}
+                  onChange={(event) => update("description", event.target.value)}
+                  aria-invalid={Boolean(errors.description)}
+                  aria-describedby={errors.description ? "agent-description-error" : undefined}
+                  className={inputClass}
+                />
+              </Field>
+            </>
+          ) : null}
+          {step === 1 ? (
+            <>
+              <Field label="Website / agent endpoint" htmlFor="agent-endpoint" error={errors.endpoint}>
+                <input
+                  id="agent-endpoint"
+                  name="endpoint"
+                  inputMode="url"
+                  placeholder="https://"
+                  value={values.endpoint}
+                  onChange={(event) => update("endpoint", event.target.value)}
+                  aria-invalid={Boolean(errors.endpoint)}
+                  aria-describedby={errors.endpoint ? "agent-endpoint-error" : undefined}
+                  className={inputClass}
+                />
+              </Field>
+              <Field label="Category" htmlFor="agent-category" error={errors.category}>
+                <select
+                  id="agent-category"
+                  name="category"
+                  value={values.category}
+                  onChange={(event) => update("category", event.target.value as FormValues["category"])}
+                  aria-invalid={Boolean(errors.category)}
+                  aria-describedby={errors.category ? "agent-category-error" : undefined}
+                  className={inputClass}
+                >
+                  <option value="">Select a category</option>
+                  {AGENT_CATEGORIES.map((category) => (
+                    <option key={category} value={category}>
+                      {category}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+              <fieldset aria-describedby={errors.capabilities ? "agent-capabilities-error" : undefined}>
+                <legend className="text-sm text-zinc-200">Capabilities</legend>
+                <div className="mt-3 grid grid-cols-1 gap-2 sm:grid-cols-2">
+                  {AGENT_CAPABILITIES.map((capability) => (
+                    <label key={capability} className="flex items-center gap-2 text-sm text-zinc-300">
+                      <input
+                        type="checkbox"
+                        name="capabilities"
+                        value={capability}
+                        checked={values.capabilities.includes(capability)}
+                        onChange={() => toggleCapability(capability)}
+                        className="size-4 accent-white"
+                      />
+                      {capability}
+                    </label>
+                  ))}
+                </div>
+                {errors.capabilities ? (
+                  <p id="agent-capabilities-error" className="mt-2 text-xs text-zinc-300">
+                    {errors.capabilities}
+                  </p>
+                ) : null}
+              </fieldset>
+            </>
+          ) : null}
+          {step === 2 ? (
+            <>
+              <dl className="space-y-3 border border-dashed border-zinc-800 px-4 py-4 text-sm">
+                <div>
+                  <dt className="text-xs text-zinc-500">Name</dt>
+                  <dd className="mt-1 text-zinc-200">{values.name.trim()}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs text-zinc-500">Description</dt>
+                  <dd className="mt-1 text-zinc-200">{values.description.trim()}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs text-zinc-500">Endpoint</dt>
+                  <dd className="mt-1 break-all text-zinc-200">{values.endpoint.trim()}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs text-zinc-500">Category</dt>
+                  <dd className="mt-1 text-zinc-200">{values.category}</dd>
+                </div>
+                <div>
+                  <dt className="text-xs text-zinc-500">Capabilities</dt>
+                  <dd className="mt-1 text-zinc-200">{values.capabilities.join(", ")}</dd>
+                </div>
+              </dl>
+              <Field label="A2A Agent Card URL (optional)" htmlFor="agent-card" error={errors.agentCardUrl}>
+                <input
+                  id="agent-card"
+                  name="agentCardUrl"
+                  inputMode="url"
+                  placeholder="https://"
+                  value={values.agentCardUrl}
+                  onChange={(event) => update("agentCardUrl", event.target.value)}
+                  aria-invalid={Boolean(errors.agentCardUrl)}
+                  aria-describedby={errors.agentCardUrl ? "agent-card-error" : undefined}
+                  className={inputClass}
+                />
+              </Field>
+            </>
+          ) : null}
+          {errors.form ? (
+            <p className="border border-dashed border-zinc-700 px-4 py-3 text-sm text-zinc-200" role="alert">
+              {errors.form}
+            </p>
+          ) : null}
+          <div className="flex flex-wrap items-center gap-3">
+            {step > 0 ? (
+              <button
+                type="button"
+                onClick={() => setStep((current) => current - 1)}
+                disabled={pending}
+                className="cursor-pointer border border-zinc-800 px-5 py-2.5 text-sm text-white transition-colors hover:border-zinc-600 disabled:opacity-70"
+              >
+                Back
+              </button>
+            ) : null}
+            {step < STEPS.length - 1 ? (
+              <button
+                type="button"
+                onClick={continueStep}
+                className="inline-flex cursor-pointer items-center bg-white px-5 py-2.5 text-sm font-medium text-zinc-800"
+              >
+                Continue
+              </button>
+            ) : (
+              <button
+                type="submit"
+                disabled={pending}
+                className="inline-flex cursor-pointer items-center bg-white px-5 py-2.5 text-sm font-medium text-zinc-800 disabled:cursor-wait disabled:opacity-70"
+              >
+                {pending ? "Registering…" : "Create identity"}
+              </button>
+            )}
+          </div>
         </div>
-        {errors.capabilities ? (
-          <p id="agent-capabilities-error" className="mt-2 text-xs text-zinc-300">
-            {errors.capabilities}
-          </p>
-        ) : null}
-      </fieldset>
-      <Field label="A2A Agent Card URL (optional)" htmlFor="agent-card" error={errors.agentCardUrl}>
-        <input
-          id="agent-card"
-          name="agentCardUrl"
-          inputMode="url"
-          placeholder="https://"
-          value={values.agentCardUrl}
-          onChange={(event) => update("agentCardUrl", event.target.value)}
-          aria-invalid={Boolean(errors.agentCardUrl)}
-          aria-describedby={errors.agentCardUrl ? "agent-card-error" : undefined}
-          className={inputClass}
-        />
-      </Field>
-      <button
-        type="submit"
-        disabled={pending}
-        className="inline-flex w-fit cursor-pointer items-center bg-white px-5 py-2.5 text-sm font-medium text-zinc-800 disabled:cursor-wait disabled:opacity-70"
-      >
-        {pending ? "Registering…" : "Submit registration"}
-      </button>
-      {errors.form ? (
-        <p className="border border-dashed border-zinc-700 px-4 py-3 text-sm text-zinc-200" role="alert">
-          {errors.form}
-        </p>
-      ) : null}
+      </div>
     </form>
   );
 }
 
-function RegistrationResult({ issued }: { issued: IssuedIdentity }) {
+function RegistrationResult({
+  issued,
+  panelRef,
+}: {
+  issued: IssuedIdentity;
+  panelRef: React.RefObject<HTMLDivElement | null>;
+}) {
   const [copied, setCopied] = useState("");
 
   async function copyToken() {
@@ -260,59 +388,53 @@ function RegistrationResult({ issued }: { issued: IssuedIdentity }) {
   const identityHref = issued.identityUrl;
 
   return (
-    <div className="mt-10 max-w-2xl border border-dashed border-zinc-800 px-5 py-6">
+    <div ref={panelRef} tabIndex={-1} className="kya-step mt-10 max-w-2xl scroll-mt-24 border border-dashed border-zinc-800 px-5 py-6 outline-none">
       <h2 className="text-2xl font-medium text-white">Identity registered</h2>
       <p className="mt-3 text-sm/5.5 font-light text-zinc-400">
-        The record is registered and unverified. Domain verification has not run.
+        The record exists and is unverified. Domain verification has not run. Do these three things before you leave.
       </p>
-      <p className="mt-4 border border-dashed border-zinc-700 px-4 py-3 text-sm text-zinc-200" role="status">
-        This management token is shown once. Store it somewhere safe before leaving this page. It is not saved in this browser. Refreshing the page hides it, and it cannot be shown again.
-      </p>
-      <dl className="mt-6 space-y-5 text-sm">
-        <div>
-          <dt className="text-xs text-zinc-500">KYA identifier</dt>
-          <dd className="mt-1 break-all font-mono text-zinc-200">{issued.publicId}</dd>
-        </div>
-        <div>
-          <dt className="text-xs text-zinc-500">Public identity URL</dt>
-          <dd className="mt-1 break-all">
-            <Link href={identityHref} className="text-white underline decoration-zinc-700 underline-offset-4">
-              {identityHref}
-            </Link>
-          </dd>
-        </div>
-        <div>
-          <dt className="text-xs text-zinc-500">Domain verification</dt>
-          <dd className="mt-1 text-zinc-200">{issued.domainVerification === "unverified" ? "Unverified" : issued.domainVerification}</dd>
-        </div>
-        <div>
-          <dt className="text-xs text-zinc-500">Management token</dt>
-          <dd className="mt-1 break-all border border-zinc-800 bg-black px-3 py-2 font-mono text-xs text-zinc-200">
+      <ol className="mt-6 space-y-6">
+        <li>
+          <p className="text-sm text-white">1. Store the management token</p>
+          <p className="mt-2 text-sm/5.5 font-light text-zinc-400" role="status">
+            This token is shown once. It is not saved in this browser. Refreshing the page hides it, and it cannot be shown again.
+          </p>
+          <p className="mt-3 break-all border border-zinc-800 bg-black px-3 py-2 font-mono text-base text-zinc-200">
             {issued.managementToken}
-          </dd>
+          </p>
           <button
             type="button"
             onClick={copyToken}
-            className="mt-3 cursor-pointer border border-zinc-800 px-4 py-2 text-sm text-white transition-colors hover:border-zinc-600"
+            className="mt-3 cursor-pointer bg-white px-4 py-2 text-sm font-medium text-zinc-800"
           >
             Copy management token
           </button>
           {copied ? <p className="mt-2 text-xs text-zinc-400">{copied}</p> : null}
-        </div>
-      </dl>
-      <p className="mt-6 text-sm/5.5 font-light text-zinc-400">{issued.dnsNextStep}</p>
-      <p className="mt-4 text-sm/5.5 font-light text-zinc-400">
-        After the token is stored, open the dashboard and enter the public id and token there. This link does not include the token, and the dashboard does not read it from the address or save it in the browser.
-      </p>
-      <Link href="/dashboard" className="mt-4 inline-flex items-center bg-white px-5 py-2.5 text-sm font-medium text-zinc-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
-        Manage this agent
-      </Link>
+        </li>
+        <li>
+          <p className="text-sm text-white">2. Open the public identity</p>
+          <p className="mt-2 break-all font-mono text-sm text-zinc-400">{issued.publicId}</p>
+          <Link href={identityHref} className="mt-2 inline-flex text-sm text-white underline decoration-zinc-700 underline-offset-4">
+            {identityHref}
+          </Link>
+        </li>
+        <li>
+          <p className="text-sm text-white">3. Verify the domain from the dashboard</p>
+          <p className="mt-2 text-sm/5.5 font-light text-zinc-400">{issued.dnsNextStep}</p>
+          <p className="mt-2 text-sm/5.5 font-light text-zinc-400">
+            Enter the public id and token on the dashboard. The link does not carry the token, and the dashboard does not read it from the address.
+          </p>
+          <Link href="/dashboard" className="mt-4 inline-flex items-center bg-white px-5 py-2.5 text-sm font-medium text-zinc-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
+            Open the dashboard
+          </Link>
+        </li>
+      </ol>
     </div>
   );
 }
 
 const inputClass =
-  "mt-2 w-full border border-zinc-800 bg-black px-3 py-2.5 text-sm text-white outline-none placeholder:text-zinc-600 focus:border-zinc-500";
+  "mt-2 w-full border border-zinc-800 bg-black px-3 py-2.5 text-base text-white outline-none placeholder:text-zinc-600 focus:border-zinc-500";
 
 function Field({
   label,

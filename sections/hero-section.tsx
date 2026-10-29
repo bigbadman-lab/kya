@@ -5,6 +5,7 @@ import { ArrowUpRight, Sparkle } from "lucide-react";
 import { motion } from "motion/react";
 import Animation from "@/components/animation";
 import { CornerMarks } from "@/components/corner-marks";
+import { AgentPromptCta } from "@/components/agent-prompt-cta";
 import { TokenMintCopy } from "@/components/token-mint-copy";
 import WarpText from "@/components/warp-text";
 
@@ -88,6 +89,7 @@ export function HeroSection({ mint }: { mint?: string | null }) {
               </span>
             </Link>
           </motion.div>
+          <AgentPromptCta className="relative z-10 mt-8 max-sm:mx-4" />
           {mint ? <TokenMintCopy mint={mint} /> : null}
         </div>
       </div>

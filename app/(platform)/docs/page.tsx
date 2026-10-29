@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { AgentPromptCta } from "@/components/agent-prompt-cta";
 import { DemoNotice } from "@/components/demo-notice";
 import { SectionFrame } from "@/components/section-frame";
 import { pageMeta } from "@/lib/seo";
@@ -53,6 +54,7 @@ export default function DocsPage() {
           <Link href="/verify" className="text-white underline decoration-zinc-700 underline-offset-4">Verification guide</Link>
           <Link href="/identity" className="text-white underline decoration-zinc-700 underline-offset-4">Identity</Link>
         </div>
+        <AgentPromptCta showPrompt className="mt-8" />
         <div className="mt-8 max-w-3xl">
           <DemoNotice>
             Placeholder values below are not a live identity or a live token. The MCP route is implemented in this application. https://knowyouragent.fun/mcp serves it after this version is deployed.

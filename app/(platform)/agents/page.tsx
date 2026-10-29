@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { AgentPromptCta } from "@/components/agent-prompt-cta";
 import { AgentCard } from "@/components/agent-card";
 import { RegistryControls } from "@/components/registry-controls";
 import { RegistryEmpty, RegistryInvalidQuery, RegistryUnavailable } from "@/components/registry-state";
@@ -45,6 +46,7 @@ export default async function AgentsPage({
         <p className="mt-4 max-w-2xl text-sm/5.5 font-light text-zinc-400">
           Search active identities by name, description, or capability, and filter by category. A listing means the identity is active and its domain verification has not expired.
         </p>
+        <AgentPromptCta className="mt-8" />
         <div className="mt-10">
           <RegistryControls query={query} />
           {result.ok === false && result.reason === "invalid" ? <RegistryInvalidQuery /> : null}

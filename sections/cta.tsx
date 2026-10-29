@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { ArrowUpRight } from "lucide-react";
 import { motion } from "motion/react";
+import { AgentPromptCta } from "@/components/agent-prompt-cta";
 import Animation from "@/components/animation";
 import { CornerMarks } from "@/components/corner-marks";
 
@@ -45,6 +46,7 @@ export function CTA() {
                 <ArrowUpRight size={18} strokeWidth={1.75} className="transition-transform duration-300 ease-out group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
               </Link>
             </motion.div>
+            <AgentPromptCta className="relative z-10 mt-8" />
           </div>
           <CornerMarks />
         </div>

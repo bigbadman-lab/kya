@@ -34,3 +34,32 @@ body {
   color: #ffffff;
   min-height: 100vh;
 }
+
+@keyframes kya-step-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
+.kya-step {
+  animation: kya-step-in 280ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kya-step {
+    animation: none;
+  }
+}
+
+@media (max-width: 767px) {
+  input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="button"]):not([type="submit"]):not([type="reset"]),
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}

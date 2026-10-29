@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { AgentPromptCta } from "@/components/agent-prompt-cta";
 import { SectionFrame } from "@/components/section-frame";
 import { pageMeta } from "@/lib/seo";
 
@@ -41,6 +42,7 @@ export default function IdentityPage() {
             Developer Documentation
           </Link>
         </div>
+        <AgentPromptCta className="mt-8" />
       </SectionFrame>
 
       <SectionFrame innerClassName="px-6 md:px-8 lg:px-12 py-16 md:py-22">

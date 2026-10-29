@@ -30,7 +30,7 @@ interface ProfileDraft {
 }
 
 const inputClass =
-  "mt-2 w-full border border-zinc-800 bg-black px-3 py-2.5 text-sm text-white outline-none placeholder:text-zinc-600 focus:border-zinc-500";
+  "mt-2 w-full border border-zinc-800 bg-black px-3 py-2.5 text-base text-white outline-none placeholder:text-zinc-600 focus:border-zinc-500";
 
 export function ManageAgent() {
   const [publicId, setPublicId] = useState("");

@@ -37,7 +37,7 @@ export function CopyIdentityUrl({ path }: { path: string }) {
           readOnly
           value={manualUrl}
           aria-label="Identity URL"
-          className="mt-2 w-full border border-zinc-800 bg-black px-3 py-2 font-mono text-xs text-zinc-300"
+          className="mt-2 w-full border border-zinc-800 bg-black px-3 py-2 font-mono text-base text-zinc-300"
           onFocus={(event) => event.currentTarget.select()}
         />
       ) : null}

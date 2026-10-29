@@ -16,7 +16,7 @@ export function RegistryControls({ query }: { query: RegistryQuery }) {
           defaultValue={query.q}
           placeholder="Name, description, or capability"
           maxLength={200}
-          className="mt-2 w-full border border-zinc-800 bg-black px-3 py-2.5 text-sm text-white outline-none placeholder:text-zinc-600 focus:border-zinc-500"
+          className="mt-2 w-full border border-zinc-800 bg-black px-3 py-2.5 text-base text-white outline-none placeholder:text-zinc-600 focus:border-zinc-500"
         />
       </div>
       <fieldset>

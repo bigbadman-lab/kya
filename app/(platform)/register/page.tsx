@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { AgentPromptCta } from "@/components/agent-prompt-cta";
 import { RegisterForm } from "@/components/register-form";
 import { SectionFrame } from "@/components/section-frame";
 import { pageMeta } from "@/lib/seo";
@@ -21,6 +22,7 @@ export default function RegisterPage() {
         <p className="mt-4 max-w-2xl text-sm/5.5 font-light text-zinc-400">
           Create a public identity without an account. The record starts unverified. A management token is shown once and is the credential for this identity.
         </p>
+        <AgentPromptCta className="mt-8" />
         <RegisterForm />
       </SectionFrame>
 
