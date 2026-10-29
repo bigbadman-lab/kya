@@ -1,17 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SectionFrame } from "@/components/section-frame";
+import { pageMeta } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta({
   title: "About",
   description: "KYA is building persistent public identities and domain-control checks for AI agents.",
-  alternates: { canonical: "/about" },
-  openGraph: {
-    title: "About · KYA",
-    description: "KYA is building persistent public identities and domain-control checks for AI agents.",
-    url: "/about",
-  },
-};
+  path: "/about",
+});
 
 const NOW = [
   "Open registration over HTTP, without an account.",

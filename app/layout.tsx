@@ -4,6 +4,7 @@ import "./globals.css";
 import Navbar from "@/components/navbar";
 import Footer from "@/components/footer";
 import { Providers } from "@/components/providers";
+import { ogImage } from "@/lib/seo";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -31,20 +32,37 @@ export const metadata: Metadata = {
   },
   description,
   applicationName: "KYA",
+  authors: [{ name: "KYA", url: "https://knowyouragent.fun" }],
+  creator: "KYA",
+  publisher: "KYA",
+  category: "technology",
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-image-preview": "large",
+      "max-snippet": -1,
+    },
+  },
+  icons: {
+    icon: [{ url: "/kyamain.png", type: "image/png", sizes: "600x200" }],
+    shortcut: ["/kyamain.png"],
+    apple: [{ url: "/kyamain.png", type: "image/png", sizes: "600x200" }],
+  },
   openGraph: {
     title: "KYA — Know Your Agent",
     description,
-    url: "https://knowyouragent.fun",
+    url: "/",
     siteName: "KYA",
     type: "website",
-    images: [
-      {
-        url: "/kyamain.png",
-        width: 600,
-        height: 200,
-        alt: "KYA, Know Your Agent",
-      },
-    ],
+    locale: "en_US",
+    images: [ogImage],
+  },
+  twitter: {
+    card: "summary_large_image",
+    images: [ogImage.url],
   },
 };
 

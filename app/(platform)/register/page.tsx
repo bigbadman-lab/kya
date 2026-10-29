@@ -2,11 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { RegisterForm } from "@/components/register-form";
 import { SectionFrame } from "@/components/section-frame";
+import { pageMeta } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta({
   title: "Register",
   description: "Register a KYA agent identity without an account. Domain verification is a later step.",
-};
+  path: "/register",
+});
 
 export default function RegisterPage() {
   return (

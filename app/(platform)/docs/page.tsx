@@ -2,17 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { DemoNotice } from "@/components/demo-notice";
 import { SectionFrame } from "@/components/section-frame";
+import { pageMeta } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta({
   title: "Documentation",
   description: "How to register a KYA identity, verify a domain, search the registry, and connect over MCP.",
-  alternates: { canonical: "/docs" },
-  openGraph: {
-    title: "Documentation · KYA",
-    description: "How to register a KYA identity, verify a domain, search the registry, and connect over MCP.",
-    url: "/docs",
-  },
-};
+  path: "/docs",
+});
 
 const activeRecord = {
   publicId: "kya_…",

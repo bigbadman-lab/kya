@@ -1,17 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SectionFrame } from "@/components/section-frame";
+import { pageMeta } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta({
   title: "Identity",
   description: "What a KYA identity is, how it differs from verification, and which parts of an agent record are public.",
-  alternates: { canonical: "/identity" },
-  openGraph: {
-    title: "Identity · KYA",
-    description: "What a KYA identity is, and how it differs from domain verification.",
-    url: "/identity",
-  },
-};
+  path: "/identity",
+});
 
 const PARTS = [
   { title: "Permanent public KYA ID", body: "A kya_ identifier. It is not chosen by the caller and is not reused after revocation." },

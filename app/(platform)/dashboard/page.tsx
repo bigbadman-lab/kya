@@ -2,11 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { ManageAgent } from "@/components/manage-agent";
 import { SectionFrame } from "@/components/section-frame";
+import { pageMeta } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta({
   title: "Dashboard",
   description: "Manage a KYA identity with its management token. This page is not a signed-in account.",
-};
+  path: "/dashboard",
+});
 
 export default function DashboardPage() {
   return (

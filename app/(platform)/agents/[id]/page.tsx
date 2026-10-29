@@ -13,6 +13,7 @@ import {
 } from "@/lib/identity";
 import { lookupInspectorReport, lookupPublicAgent } from "@/lib/identity-read";
 import type { PublicInspection } from "@/lib/inspector";
+import { pageMeta } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
@@ -27,19 +28,23 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     return {
       title: "Registry unavailable",
       description: "This identity could not be read.",
+      robots: { index: false, follow: false },
     };
   }
-  if (!result.data) return { title: "Identity not found" };
+  if (!result.data) return { title: "Identity not found", robots: { index: false, follow: false } };
   if (!isPublicAgentIdentity(result.data)) {
     return {
       title: result.data.publicId,
       description: `This KYA identity is ${result.data.lifecycle}. Public details are not listed.`,
+      alternates: { canonical: `/agents/${result.data.publicId}` },
+      robots: { index: false, follow: true },
     };
   }
-  return {
+  return pageMeta({
     title: result.data.name,
     description: `${result.data.name} is a public KYA identity. Domain verification is not a safety assessment.`,
-  };
+    path: `/agents/${result.data.publicId}`,
+  });
 }
 
 export default async function AgentProfilePage({ params }: PageProps) {

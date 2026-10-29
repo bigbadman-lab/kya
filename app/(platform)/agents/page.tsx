@@ -10,14 +10,16 @@ import {
   registryHref,
   searchPublicAgents,
 } from "@/lib/identity-read";
+import { pageMeta } from "@/lib/seo";
 
 export const dynamic = "force-dynamic";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta({
   title: "Registry",
   description:
     "Public registry of active KYA identities with current domain verification. Domain verification is not a safety assessment.",
-};
+  path: "/agents",
+});
 
 export default async function AgentsPage({
   searchParams,

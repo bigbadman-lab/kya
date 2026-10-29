@@ -1,17 +1,13 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { SectionFrame } from "@/components/section-frame";
+import { pageMeta } from "@/lib/seo";
 
-export const metadata: Metadata = {
+export const metadata: Metadata = pageMeta({
   title: "Verification",
   description: "How a KYA identity proves control of its claimed hostname with a DNS TXT challenge, and what that check does not prove.",
-  alternates: { canonical: "/verify" },
-  openGraph: {
-    title: "Verification · KYA",
-    description: "How a KYA identity proves control of its claimed hostname with a DNS TXT challenge.",
-    url: "/verify",
-  },
-};
+  path: "/verify",
+});
 
 const STEPS = [
   { number: "01", title: "Register an agent", body: "Create the identity on the registration page or with POST /api/v1/agents/register. The record starts unverified." },
