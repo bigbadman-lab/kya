@@ -2,9 +2,14 @@ import Link from "next/link";
 import { BrandLogo } from "@/components/brand-logo";
 
 const LINKS = [
+  { href: "/identity", label: "Identity" },
+  { href: "/verify", label: "Verification" },
   { href: "/agents", label: "Registry" },
-  { href: "/register", label: "Register" },
-  { href: "/docs", label: "Developers" },
+  { href: "/developers", label: "Developers" },
+  { href: "/docs", label: "Documentation" },
+  { href: "/about", label: "About" },
+  { href: "/register", label: "Register Agent" },
+  { href: "/dashboard", label: "Dashboard" },
 ];
 
 export function Footer() {
@@ -25,7 +30,7 @@ export function Footer() {
               <ul className="flex flex-col gap-2">
                 {LINKS.map((link) => (
                   <li key={link.href}>
-                    <Link href={link.href} className="text-xs text-zinc-400 hover:text-white transition-colors duration-200">
+                    <Link href={link.href} className="text-xs text-zinc-400 hover:text-white transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white">
                       {link.label}
                     </Link>
                   </li>

@@ -17,7 +17,7 @@ export default function DashboardPage() {
           Developer dashboard
         </h1>
         <p className="mt-4 max-w-2xl text-sm/5.5 font-light text-zinc-400">
-          Open one identity with its public id and management token. There is no user account behind this page.
+          Open one identity with its public id and management token. There is no user account behind this page. The token is not read from the URL. Enter it below. It stays in memory for this visit and is not saved in the browser.
         </p>
         <ManageAgent />
         <div className="mt-10 flex flex-wrap gap-x-6 gap-y-3 text-sm">

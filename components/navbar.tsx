@@ -8,9 +8,9 @@ import { BrandLogo } from "@/components/brand-logo";
 import { CornerMarks } from "@/components/corner-marks";
 
 const LINKS = [
-  { href: "/agents", label: "Registry" },
-  { href: "/docs", label: "Developers" },
-  { href: "/dashboard", label: "Dashboard" },
+  { href: "/agents", label: "Agents" },
+  { href: "/developers", label: "Developers" },
+  { href: "/about", label: "About" },
 ];
 
 function isCurrent(pathname: string, href: string) {
@@ -33,7 +33,7 @@ export function Navbar() {
 
           <div
             id="menu"
-            className={`${mobileOpen ? "max-md:w-full" : "max-md:w-0"} max-md:fixed max-md:top-0 max-md:z-50 max-md:left-0 max-md:transition-all max-md:duration-300 max-md:overflow-hidden max-md:h-screen max-md:bg-black max-md:flex-col max-md:items-center max-md:justify-center md:absolute md:left-1/2 md:-translate-x-1/2 flex items-center gap-8 text-sm`}
+            className={`${mobileOpen ? "max-md:w-full" : "max-md:w-0"} max-md:fixed max-md:top-0 max-md:z-50 max-md:left-0 max-md:transition-all max-md:duration-300 motion-reduce:transition-none max-md:overflow-hidden max-md:h-screen max-md:bg-black max-md:flex-col max-md:items-center max-md:justify-center md:absolute md:left-1/2 md:-translate-x-1/2 flex items-center gap-8 text-sm`}
           >
             {LINKS.map((link) => (
               <Link
@@ -41,7 +41,7 @@ export function Navbar() {
                 href={link.href}
                 onClick={() => setMobileOpen(false)}
                 aria-current={isCurrent(pathname, link.href) ? "page" : undefined}
-                className={`transition-colors duration-200 ${isCurrent(pathname, link.href) ? "text-white" : "text-zinc-400 hover:text-white"}`}
+                className={`transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white ${isCurrent(pathname, link.href) ? "text-white" : "text-zinc-400 hover:text-white"}`}
               >
                 {link.label}
               </Link>
@@ -49,7 +49,8 @@ export function Navbar() {
             <Link
               href="/register"
               onClick={() => setMobileOpen(false)}
-              className="md:hidden inline-flex items-center gap-1 bg-white px-5 py-2.5 text-sm font-medium text-zinc-800"
+              aria-current={pathname === "/register" ? "page" : undefined}
+              className="md:hidden inline-flex items-center gap-1 bg-white px-5 py-2.5 text-sm font-medium text-zinc-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
             >
               Register Agent
               <ArrowUpRight size={18} strokeWidth={1.8} />
@@ -70,7 +71,8 @@ export function Navbar() {
 
           <Link
             href="/register"
-            className="group hidden md:inline-flex items-center justify-center bg-white text-zinc-800 px-5 py-2.5 rounded-sm text-sm font-medium transition-all duration-200 overflow-hidden"
+            aria-current={pathname === "/register" ? "page" : undefined}
+            className="group hidden md:inline-flex items-center justify-center bg-white text-zinc-800 px-5 py-2.5 rounded-sm text-sm font-medium transition-all duration-200 overflow-hidden focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
           >
             Register Agent
             <span className="inline-flex items-center overflow-hidden transition-all duration-300 ease-out max-w-0 group-hover:max-w-5 opacity-0 group-hover:opacity-100 group-hover:ml-1.5">

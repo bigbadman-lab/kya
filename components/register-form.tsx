@@ -301,6 +301,12 @@ function RegistrationResult({ issued }: { issued: IssuedIdentity }) {
         </div>
       </dl>
       <p className="mt-6 text-sm/5.5 font-light text-zinc-400">{issued.dnsNextStep}</p>
+      <p className="mt-4 text-sm/5.5 font-light text-zinc-400">
+        After the token is stored, open the dashboard and enter the public id and token there. This link does not include the token, and the dashboard does not read it from the address or save it in the browser.
+      </p>
+      <Link href="/dashboard" className="mt-4 inline-flex items-center bg-white px-5 py-2.5 text-sm font-medium text-zinc-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
+        Manage this agent
+      </Link>
     </div>
   );
 }

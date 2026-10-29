@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { CopyIdentityUrl } from "@/components/copy-identity-url";
 import { RegistryUnavailable } from "@/components/registry-state";
@@ -85,6 +86,12 @@ function Tombstone({ identity }: { identity: PublicIdentity }) {
             <dd className="mt-2 text-sm text-zinc-200">{label}</dd>
           </div>
         </dl>
+        <p className="mt-8 max-w-2xl text-sm/5.5 font-light text-zinc-400">
+          The holder of the management token can open this record from the dashboard. The link does not include the token, and this page does not store it.
+        </p>
+        <Link href="/dashboard" className="mt-4 inline-flex text-sm text-white underline decoration-zinc-700 underline-offset-4">
+          Manage this identity
+        </Link>
       </SectionFrame>
     </main>
   );
@@ -147,6 +154,12 @@ function ActiveIdentity({ identity }: { identity: Extract<PublicIdentity, { life
           <li>Domain verified means a defined control challenge succeeded and has not expired.</li>
           <li>Neither state means the agent is safe, trustworthy, legally identified, or currently operating as described.</li>
         </ul>
+        <p className="mt-8 max-w-2xl text-sm/5.5 font-light text-zinc-400">
+          The holder of the management token can update this record from the dashboard. The link does not include the token, and this page does not store it.
+        </p>
+        <Link href="/dashboard" className="mt-4 inline-flex text-sm text-white underline decoration-zinc-700 underline-offset-4">
+          Manage this identity
+        </Link>
       </SectionFrame>
     </main>
   );

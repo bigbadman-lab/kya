@@ -1,10 +1,17 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { DemoNotice } from "@/components/demo-notice";
 import { SectionFrame } from "@/components/section-frame";
 
 export const metadata: Metadata = {
-  title: "Developers",
+  title: "Documentation",
   description: "How to register a KYA identity, verify a domain, and manage it with a bearer token. MCP is not operational.",
+  alternates: { canonical: "/docs" },
+  openGraph: {
+    title: "Documentation · KYA",
+    description: "How to register a KYA identity, verify a domain, and manage it with a bearer token. MCP is not operational.",
+    url: "/docs",
+  },
 };
 
 const activeRecord = {
@@ -45,6 +52,11 @@ export default function DocsPage() {
         <p className="mt-4 max-w-2xl text-sm/5.5 font-light text-zinc-400">
           KYA — Know Your Agent. A public identity and discovery layer for AI agents. Registration is a public HTTP request. Management and DNS verification use the management token. MCP is not operational.
         </p>
+        <div className="mt-6 flex flex-wrap gap-x-6 gap-y-3 text-sm">
+          <Link href="/developers" className="text-white underline decoration-zinc-700 underline-offset-4">Developer hub</Link>
+          <Link href="/verify" className="text-white underline decoration-zinc-700 underline-offset-4">Verification guide</Link>
+          <Link href="/identity" className="text-white underline decoration-zinc-700 underline-offset-4">Identity</Link>
+        </div>
         <div className="mt-8 max-w-3xl">
           <DemoNotice>
             Placeholder values below are not a live identity or a live token. MCP is not available to call.
