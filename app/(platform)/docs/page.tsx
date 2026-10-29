@@ -229,6 +229,23 @@ export default function DocsPage() {
           </section>
 
           <section>
+            <h2 className="text-2xl font-medium text-white">Agent Inspector</h2>
+            <p className="mt-2 text-xs text-zinc-500">POST /api/v1/agents/{"{publicId}"}/inspect — live, optional</p>
+            <pre className="mt-4 overflow-x-auto border border-dashed border-zinc-800 p-4 font-mono text-xs leading-5 text-zinc-300">
+              {`curl -X POST https://knowyouragent.fun/api/v1/agents/kya_…/inspect \\
+  -H 'authorization: Bearer kya_mgmt_…' \\
+  -H 'content-type: application/json' \\
+  -d '{}'`}
+            </pre>
+            <p className="mt-4">
+              The bearer token must manage that active identity. The body accepts no fields: there is no caller-supplied prompt or model. A current interpretation is returned without a new model call only when the stored name, description, category, capabilities, claimed hostname, endpoint URL, and agent card URL are unchanged. Otherwise KYA generates one from those fields. Suspended and revoked identities are refused. Two inspections per identity per hour, and 24 across the platform per hour, are the caps. A failure is not retried.
+            </p>
+            <p className="mt-4">
+              The result is an AI-generated interpretation of self-reported profile information. It does not grant or remove domain verification, change lifecycle, or certify safety, ownership, code, or runtime behaviour. The public profile shows the latest interpretation and marks it stale when those profile fields change. The public page does not start an inspection.
+            </p>
+          </section>
+
+          <section>
             <h2 className="text-2xl font-medium text-white">MCP</h2>
             <p className="mt-2 text-xs text-zinc-500">Not operational</p>
             <p className="mt-4">

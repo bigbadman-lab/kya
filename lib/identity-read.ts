@@ -10,6 +10,7 @@ import {
   parsePublicIdentity,
   parseRegistrySearch,
 } from "@/lib/identity";
+import { parseStoredInspection, type PublicInspection } from "@/lib/inspector";
 import { createPublicSupabase } from "@/lib/public-supabase";
 
 export const REGISTRY_PAGE_SIZE = 20;
@@ -87,6 +88,19 @@ export async function lookupPublicAgent(publicId: string): Promise<IdentityRead<
   const identity = parsePublicIdentity(jsonValue(data));
   if (!identity) return { ok: false, reason: "unavailable" };
   return { ok: true, data: identity };
+}
+
+export async function lookupInspectorReport(publicId: string): Promise<PublicInspection> {
+  await connection();
+  const supabase = createPublicSupabase();
+  if (!supabase) return { status: "unavailable" };
+
+  const { data, error } = await supabase.rpc("lookup_inspector_report", {
+    p_public_id: publicId,
+  });
+  if (error || data == null) return { status: "unavailable" };
+  const report = parseStoredInspection(jsonValue(data));
+  return report ?? { status: "unavailable" };
 }
 
 export async function searchPublicAgents(

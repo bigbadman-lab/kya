@@ -23,6 +23,7 @@ const USES = [
   { title: "Management", body: "Later calls send Authorization: Bearer and the management token. The token is scoped to one identity." },
   { title: "DNS challenge", body: "Issue a TXT challenge, publish it, then complete it. KYA reads DNS. The caller does not submit the lookup result." },
   { title: "Registry discovery", body: "Verified, unexpired, active identities are listed on /agents. There is no public search REST route." },
+  { title: "Agent inspection", body: "POST /api/v1/agents/{publicId}/inspect with the bearer token asks for an AI reading of the stored profile. It is optional. It does not change domain verification or lifecycle." },
 ];
 
 export default function DevelopersPage() {
@@ -99,6 +100,12 @@ export default function DevelopersPage() {
           ))}
         </ul>
         <div className="mt-12 max-w-2xl border border-dashed border-zinc-800 px-5 py-6">
+          <h2 className="text-2xl font-medium text-white">Agent Inspector</h2>
+          <p className="mt-3 text-sm/5.5 font-light text-zinc-400">
+            Inspection is optional. The operator sends an empty JSON body with the management token. KYA sends the stored name, description, category, capabilities, hostname, endpoint, and agent card URL to the model. The result is an interpretation of that self-reported text. It does not prove domain control, safety, legal identity, or how the endpoint behaves. A change to any of those fields makes the previous interpretation stale. Opening a public profile does not run a new inspection.
+          </p>
+        </div>
+        <div className="mt-8 max-w-2xl border border-dashed border-zinc-800 px-5 py-6">
           <h2 className="text-2xl font-medium text-white">MCP integration — coming next</h2>
           <p className="mt-3 text-sm/5.5 font-light text-zinc-400">
             MCP is not live. There is no tool to call. Use the HTTP registration route until that exists. Do not send a management token to an undocumented endpoint.

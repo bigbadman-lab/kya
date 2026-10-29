@@ -45,6 +45,7 @@ export function ManageAgent() {
   const [confirmRotate, setConfirmRotate] = useState(false);
   const [confirmRevokeCredential, setConfirmRevokeCredential] = useState(false);
   const [confirmRevokeIdentity, setConfirmRevokeIdentity] = useState(false);
+  const [inspection, setInspection] = useState<InspectionView | null>(null);
 
   const active = identity && isPublicAgentIdentity(identity) ? identity : null;
 
@@ -73,6 +74,7 @@ export function ManageAgent() {
     }
     setIdentity(result.body);
     setDraft(isPublicAgentIdentity(result.body) ? draftFrom(result.body) : null);
+    setInspection(null);
     setNotice("The token is held in memory for this page only. Refreshing or leaving clears it.");
   }
 
@@ -100,6 +102,7 @@ export function ManageAgent() {
     }
     setIdentity(result.body);
     setDraft(draftFrom(result.body, draft.agentCardUrl));
+    setInspection(null);
     setNotice(
       result.body.claimedHost === active.claimedHost
         ? "Profile saved. Domain verification was left as it was."
@@ -198,6 +201,25 @@ export function ManageAgent() {
     setNotice(action === "revoke" ? "The identity is revoked. The public id stays reserved." : "Lifecycle updated.");
   }
 
+  async function inspectAgent() {
+    if (!active) return;
+    setError("");
+    setNotice("");
+    setPending("Inspecting…");
+    const result = await send(`/api/v1/agents/${active.publicId}/inspect`, "POST", token, {});
+    setPending("");
+    if (!result.ok || !isInspection(result.body)) {
+      setError(safeMessage(result.body, "The inspection could not be completed."));
+      return;
+    }
+    setInspection(result.body);
+    setNotice(
+      result.body.reused
+        ? "This profile already has a current interpretation. No new analysis was run."
+        : "Inspection saved. It interprets the self-reported profile and does not change domain verification.",
+    );
+  }
+
   return (
     <div className="mt-10 max-w-2xl">
       <p className="border border-dashed border-zinc-700 px-4 py-3 text-sm text-zinc-200">
@@ -271,6 +293,37 @@ export function ManageAgent() {
           <Link href={identity.identityUrl} className="mt-4 inline-flex text-sm text-white underline decoration-zinc-700 underline-offset-4">
             Public profile
           </Link>
+        </section>
+      ) : null}
+
+      {active ? (
+        <section className="mt-10 border border-dashed border-zinc-800 px-5 py-6">
+          <h2 className="text-2xl font-medium text-white">Agent Inspector</h2>
+          <p className="mt-3 text-sm/5.5 font-light text-zinc-400">
+            Ask for an interpretation of the stored profile. The request uses the token held in memory on this page. It does not change registration or domain verification. If the name, description, category, capabilities, hostname, endpoint, or agent card URL change, request it again. The previous reading is then stale.
+          </p>
+          <button
+            type="button"
+            onClick={inspectAgent}
+            disabled={pending !== ""}
+            className="mt-5 cursor-pointer border border-zinc-800 px-4 py-2 text-sm text-white transition-colors hover:border-zinc-600 disabled:opacity-70"
+          >
+            {pending === "Inspecting…" ? "Inspecting…" : "Inspect agent"}
+          </button>
+          {inspection ? (
+            <div className="mt-6 text-sm/5.5 font-light text-zinc-300">
+              <p className="text-zinc-200">{inspection.label}</p>
+              <p className="mt-4">{inspection.summary}</p>
+              <p className="mt-4">{inspection.capabilitiesInterpretation}</p>
+              <ul className="mt-4 space-y-2">
+                {inspection.useCases.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+              <p className="mt-4">{inspection.limitations}</p>
+              <p className="mt-4 text-zinc-500">{inspection.evidence}</p>
+            </div>
+          ) : null}
         </section>
       ) : null}
 
@@ -545,6 +598,33 @@ function safeMessage(body: unknown, fallback: string): string {
   const message = body.message;
   if (typeof message !== "string" || message.length > 300 || /kya_(mgmt|chal)_/.test(message)) return fallback;
   return message;
+}
+
+interface InspectionView {
+  label: string;
+  summary: string;
+  capabilitiesInterpretation: string;
+  useCases: string[];
+  limitations: string;
+  evidence: string;
+  reused: boolean;
+}
+
+function isInspection(value: unknown): value is InspectionView {
+  if (typeof value !== "object" || value === null) return false;
+  const record = value as Record<string, unknown>;
+  return (
+    record.status === "current" &&
+    typeof record.label === "string" &&
+    typeof record.summary === "string" &&
+    typeof record.capabilitiesInterpretation === "string" &&
+    Array.isArray(record.useCases) &&
+    record.useCases.every((item) => typeof item === "string") &&
+    typeof record.limitations === "string" &&
+    typeof record.evidence === "string" &&
+    typeof record.reused === "boolean" &&
+    !/kya_mgmt_|sk-/.test(JSON.stringify(record))
+  );
 }
 
 function isIdentity(value: unknown): value is PublicIdentity {

@@ -293,7 +293,8 @@ begin
     raise exception 'kya_test_failed: inspector write succeeded';
   exception
     when raise_exception then
-      if sqlerrm is distinct from 'kya_inspector_deferred' then
+      if sqlerrm is distinct from 'kya_inspector_deferred'
+         and sqlerrm is distinct from 'kya_forbidden' then
         raise exception 'kya_test_failed: inspector got %', sqlerrm;
       end if;
   end;

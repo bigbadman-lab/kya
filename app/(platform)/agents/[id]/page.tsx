@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { AgentInspector } from "@/components/agent-inspector";
 import { CopyIdentityUrl } from "@/components/copy-identity-url";
 import { RegistryUnavailable } from "@/components/registry-state";
 import { SectionFrame } from "@/components/section-frame";
@@ -10,7 +11,8 @@ import {
   isPublicAgentIdentity,
   type PublicIdentity,
 } from "@/lib/identity";
-import { lookupPublicAgent } from "@/lib/identity-read";
+import { lookupInspectorReport, lookupPublicAgent } from "@/lib/identity-read";
+import type { PublicInspection } from "@/lib/inspector";
 
 export const dynamic = "force-dynamic";
 
@@ -58,7 +60,8 @@ export default async function AgentProfilePage({ params }: PageProps) {
   }
   if (!result.data) notFound();
   if (!isPublicAgentIdentity(result.data)) return <Tombstone identity={result.data} />;
-  return <ActiveIdentity identity={result.data} />;
+  const inspection = await lookupInspectorReport(result.data.publicId);
+  return <ActiveIdentity identity={result.data} inspection={inspection} />;
 }
 
 function Tombstone({ identity }: { identity: PublicIdentity }) {
@@ -97,7 +100,13 @@ function Tombstone({ identity }: { identity: PublicIdentity }) {
   );
 }
 
-function ActiveIdentity({ identity }: { identity: Extract<PublicIdentity, { lifecycle: "active" }> }) {
+function ActiveIdentity({
+  identity,
+  inspection,
+}: {
+  identity: Extract<PublicIdentity, { lifecycle: "active" }>;
+  inspection: PublicInspection;
+}) {
   return (
     <main className="grow">
       <SectionFrame innerClassName="px-6 md:px-8 lg:px-12 py-16 md:py-22">
@@ -152,8 +161,12 @@ function ActiveIdentity({ identity }: { identity: Extract<PublicIdentity, { life
         <ul className="mt-6 max-w-2xl space-y-4 text-sm/5.5 font-light text-zinc-400">
           <li>Registered means an identity record exists.</li>
           <li>Domain verified means a defined control challenge succeeded and has not expired.</li>
-          <li>Neither state means the agent is safe, trustworthy, legally identified, or currently operating as described.</li>
+          <li>AI inspected means a model interpreted the self-reported profile. It is not a verification or a safety judgment.</li>
+          <li>None of these states means the agent is safe, trustworthy, legally identified, or currently operating as described.</li>
         </ul>
+        <div className="mt-14">
+          <AgentInspector report={inspection} />
+        </div>
         <p className="mt-8 max-w-2xl text-sm/5.5 font-light text-zinc-400">
           The holder of the management token can update this record from the dashboard. The link does not include the token, and this page does not store it.
         </p>
