@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import { ArrowUpRight } from "lucide-react";
 import { BrandLogo } from "@/components/brand-logo";
 import { CornerMarks } from "@/components/corner-marks";
+import { X_URL, XIcon } from "@/components/x-icon";
 
 const LINKS = [
   { href: "/agents", label: "Agents" },
@@ -46,6 +47,16 @@ export function Navbar() {
                 {link.label}
               </Link>
             ))}
+            <a
+              href={X_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() => setMobileOpen(false)}
+              className="md:hidden inline-flex items-center gap-2 text-zinc-400 hover:text-white transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+            >
+              <XIcon size={16} />
+              X
+            </a>
             <Link
               href="/register"
               onClick={() => setMobileOpen(false)}
@@ -69,32 +80,42 @@ export function Navbar() {
             </button>
           </div>
 
-          <Link
-            href="/register"
-            aria-current={pathname === "/register" ? "page" : undefined}
-            className="group hidden md:inline-flex items-center justify-center bg-white text-zinc-800 px-5 py-2.5 rounded-sm text-sm font-medium transition-all duration-200 overflow-hidden focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
-          >
-            Register Agent
-            <span className="inline-flex items-center overflow-hidden transition-all duration-300 ease-out max-w-0 group-hover:max-w-5 opacity-0 group-hover:opacity-100 group-hover:ml-1.5">
-              <ArrowUpRight strokeWidth={1.8} className="size-5 shrink-0 translate-y-3 -translate-x-1.5 opacity-0 group-hover:translate-y-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300 ease-out" />
-            </span>
-          </Link>
-
-          <button
-            type="button"
-            id="open-menu"
-            aria-label="Open menu"
-            aria-expanded={mobileOpen}
-            aria-controls="menu"
-            onClick={() => setMobileOpen(true)}
-            className="md:hidden bg-zinc-900 hover:bg-zinc-800 text-white p-2 rounded-md aspect-square font-medium transition cursor-pointer"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-              <path d="M4 12h16" />
-              <path d="M4 18h16" />
-              <path d="M4 6h16" />
-            </svg>
-          </button>
+          <div className="flex items-center gap-3 md:gap-4">
+            <a
+              href={X_URL}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="KYA on X"
+              className="inline-flex items-center justify-center text-zinc-400 hover:text-white transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+            >
+              <XIcon size={16} />
+            </a>
+            <Link
+              href="/register"
+              aria-current={pathname === "/register" ? "page" : undefined}
+              className="group hidden md:inline-flex items-center justify-center bg-white text-zinc-800 px-5 py-2.5 rounded-sm text-sm font-medium transition-all duration-200 overflow-hidden focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white"
+            >
+              Register Agent
+              <span className="inline-flex items-center overflow-hidden transition-all duration-300 ease-out max-w-0 group-hover:max-w-5 opacity-0 group-hover:opacity-100 group-hover:ml-1.5">
+                <ArrowUpRight strokeWidth={1.8} className="size-5 shrink-0 translate-y-3 -translate-x-1.5 opacity-0 group-hover:translate-y-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300 ease-out" />
+              </span>
+            </Link>
+            <button
+              type="button"
+              id="open-menu"
+              aria-label="Open menu"
+              aria-expanded={mobileOpen}
+              aria-controls="menu"
+              onClick={() => setMobileOpen(true)}
+              className="md:hidden bg-zinc-900 hover:bg-zinc-800 text-white p-2 rounded-md aspect-square font-medium transition cursor-pointer"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                <path d="M4 12h16" />
+                <path d="M4 18h16" />
+                <path d="M4 6h16" />
+              </svg>
+            </button>
+          </div>
         </nav>
       </div>
     </header>

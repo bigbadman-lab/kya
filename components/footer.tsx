@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { BrandLogo } from "@/components/brand-logo";
+import { X_URL, XIcon } from "@/components/x-icon";
 
 const LINKS = [
   { href: "/identity", label: "Identity" },
@@ -25,6 +26,15 @@ export function Footer() {
               <p className="text-sm/5.5 text-zinc-400 mt-4 max-w-xs">
                 Identity and discovery for the agent economy.
               </p>
+              <a
+                href={X_URL}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="mt-4 inline-flex items-center gap-2 text-xs text-zinc-400 hover:text-white transition-colors duration-200 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-white"
+              >
+                <XIcon size={14} />
+                @KYAgents
+              </a>
             </div>
             <nav aria-label="Footer">
               <ul className="flex flex-col gap-2">
