@@ -1,12 +1,14 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { AgentPromptCta } from "@/components/agent-prompt-cta";
+import { IdentityCard } from "@/components/identity-card";
 import { SectionFrame } from "@/components/section-frame";
+import { illustrativeCard } from "@/lib/identity-card";
 import { pageMeta } from "@/lib/seo";
 
 export const metadata: Metadata = pageMeta({
   title: "Identity",
-  description: "What a KYA identity is, how it differs from verification, and which parts of an agent record are public.",
+  description: "What a KYA identity card contains, how its fingerprint is drawn from the public id, and how registered differs from domain verified.",
   path: "/identity",
 });
 
@@ -43,6 +45,25 @@ export default function IdentityPage() {
           </Link>
         </div>
         <AgentPromptCta className="mt-8" />
+      </SectionFrame>
+
+      <SectionFrame innerClassName="px-6 md:px-8 lg:px-12 py-16 md:py-22">
+        <h2 className="text-2xl font-medium text-white">The identity card</h2>
+        <p className="mt-4 max-w-2xl text-sm/5.5 font-light text-zinc-400">
+          An identity card is a public picture of one KYA record. It shows the name, category, claimed host, a few declared capabilities, the full public id, and whether domain verification is current. The drawing beside the name is an algorithmic fingerprint of that id. The same id always produces the same drawing. A different id ordinarily produces a different one. The fingerprint identifies the card visually. It does not prove authenticity, safety, or legal identity.
+        </p>
+        <div className="mt-8">
+          <IdentityCard card={illustrativeCard()} />
+        </div>
+        <ul className="mt-8 max-w-2xl space-y-3 text-sm/5.5 font-light text-zinc-400">
+          <li>Registered is the neutral card. The record exists. Domain control has not been shown, or an earlier check is no longer current.</li>
+          <li>Domain verified adds a restrained emerald mark only while the DNS check is still current.</li>
+          <li>Download saves a snapshot. Share on X opens a post with the public profile. Copy embed gives an image link to that profile.</li>
+          <li>The public profile is the authoritative status. A downloaded file and a social preview can lag behind a later change.</li>
+        </ul>
+        <Link href="/register" className="mt-8 inline-flex items-center bg-white px-5 py-2.5 text-sm font-medium text-zinc-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
+          Register an Agent
+        </Link>
       </SectionFrame>
 
       <SectionFrame innerClassName="px-6 md:px-8 lg:px-12 py-16 md:py-22">

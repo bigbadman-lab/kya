@@ -3,6 +3,8 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AgentInspector } from "@/components/agent-inspector";
 import { CopyIdentityUrl } from "@/components/copy-identity-url";
+import { IdentityCard } from "@/components/identity-card";
+import { IdentityCardActions } from "@/components/identity-card-actions";
 import { RegistryUnavailable } from "@/components/registry-state";
 import { SectionFrame } from "@/components/section-frame";
 import {
@@ -13,7 +15,7 @@ import {
 } from "@/lib/identity";
 import { lookupInspectorReport, lookupPublicAgent } from "@/lib/identity-read";
 import type { PublicInspection } from "@/lib/inspector";
-import { pageMeta } from "@/lib/seo";
+import { cardFromIdentity, cardPngPath, type IdentityCardModel } from "@/lib/identity-card";
 
 export const dynamic = "force-dynamic";
 
@@ -33,18 +35,43 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   }
   if (!result.data) return { title: "Identity not found", robots: { index: false, follow: false } };
   if (!isPublicAgentIdentity(result.data)) {
-    return {
-      title: result.data.publicId,
-      description: `This KYA identity is ${result.data.lifecycle}. Public details are not listed.`,
-      alternates: { canonical: `/agents/${result.data.publicId}` },
-      robots: { index: false, follow: true },
-    };
+    return cardMetadata(cardFromIdentity(result.data), `This KYA identity is ${result.data.lifecycle}. Public details are not listed.`, false);
   }
-  return pageMeta({
-    title: result.data.name,
-    description: `${result.data.name} is a public KYA identity. Domain verification is not a safety assessment.`,
-    path: `/agents/${result.data.publicId}`,
-  });
+  const card = cardFromIdentity(result.data);
+  const description = card.tone === "verified"
+    ? `${result.data.name} has current domain verification on KYA. Verification is a DNS control check, not a safety assessment.`
+    : `${result.data.name} is registered on KYA. Domain verification is not current. A KYA record is not a safety assessment.`;
+  return cardMetadata(card, description, true);
+}
+
+function cardMetadata(card: IdentityCardModel, description: string, index: boolean): Metadata {
+  const path = card.profilePath ?? `/agents/${card.publicId}`;
+  const title = card.name ?? card.publicId;
+  const image = {
+    url: cardPngPath(card.publicId),
+    width: 1200,
+    height: 630,
+    alt: card.name ? `${card.name} KYA identity card` : `${card.publicId} KYA identity`,
+  };
+  return {
+    title,
+    description,
+    alternates: { canonical: path },
+    robots: { index, follow: true },
+    openGraph: {
+      title: `${title} · KYA`,
+      description,
+      url: path,
+      siteName: "KYA",
+      type: "website",
+      locale: "en_US",
+      images: [image],
+    },
+    twitter: {
+      card: "summary_large_image",
+      images: [image.url],
+    },
+  };
 }
 
 export default async function AgentProfilePage({ params }: PageProps) {
@@ -83,6 +110,10 @@ function Tombstone({ identity }: { identity: PublicIdentity }) {
         <p className="mt-4 max-w-2xl text-sm/5.5 font-light text-zinc-400">
           This identity is {label.toLowerCase()}. A record exists. Its name, endpoint, capabilities, and verification details are not public.
         </p>
+        <div className="mt-8">
+          <IdentityCard card={cardFromIdentity(identity)} />
+          <IdentityCardActions card={cardFromIdentity(identity)} />
+        </div>
         <dl className="mt-12 grid max-w-3xl grid-cols-1 gap-8 border-t border-dashed border-zinc-800 pt-8 sm:grid-cols-2">
           <div>
             <dt className="text-xs text-zinc-500">KYA identifier</dt>
@@ -121,6 +152,10 @@ function ActiveIdentity({
         </h1>
         <p className="mt-4 max-w-2xl text-sm/5.5 font-light text-zinc-400">{identity.description}</p>
         <p className="mt-4 text-xs text-zinc-500">{identity.category}</p>
+        <div className="mt-8">
+          <IdentityCard card={cardFromIdentity(identity)} />
+          <IdentityCardActions card={cardFromIdentity(identity)} />
+        </div>
 
         <dl className="mt-12 grid max-w-3xl grid-cols-1 gap-8 border-t border-dashed border-zinc-800 pt-8 sm:grid-cols-2">
           <div>

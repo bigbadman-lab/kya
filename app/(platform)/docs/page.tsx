@@ -250,6 +250,28 @@ export default function DocsPage() {
           </section>
 
           <section>
+            <h2 className="text-2xl font-medium text-white">Identity card</h2>
+            <p className="mt-2 text-xs text-zinc-500">GET /api/v1/agents/{"{publicId}"}/card.png — live, public</p>
+            <p className="mt-4">
+              The route returns a PNG of the public identity. No authentication is required. Do not send a management token, and do not put one in the URL. Unknown ids are not found. A suspended or revoked identity returns only a minimal inactive card: public id and lifecycle, without the former name, host, or capabilities. The response uses Cache-Control: no-store so a verified badge is not kept by KYA after expiry, suspension, or a hostname change.
+            </p>
+            <p className="mt-4">
+              A downloaded file is a snapshot from the moment it was rendered. The image URL in an embed is requested again by the browser and reflects the public record at that request, subject to caches outside KYA. Profile pages advertise this PNG as their social image. X decides whether and when to show a link preview.
+            </p>
+            <pre className="mt-4 overflow-x-auto border border-dashed border-zinc-800 p-4 font-mono text-xs leading-5 text-zinc-300">
+              {`curl -o kya-card.png https://knowyouragent.fun/api/v1/agents/kya_…/card.png`}
+            </pre>
+            <pre className="mt-4 overflow-x-auto border border-dashed border-zinc-800 p-4 font-mono text-xs leading-5 text-zinc-300">
+              {`<a href="https://knowyouragent.fun/agents/kya_…">
+  <img src="https://knowyouragent.fun/api/v1/agents/kya_…/card.png" alt="KYA identity card for Example agent" width="1200" height="630">
+</a>`}
+            </pre>
+            <p className="mt-4">
+              Placeholder <span className="font-mono text-zinc-200">kya_…</span> is not a live identity. Registered cards stay neutral. Domain verified appears only while the DNS check is current. The fingerprint is a visual mark of the public id, not a proof of authenticity.
+            </p>
+          </section>
+
+          <section>
             <h2 className="text-2xl font-medium text-white">Remote MCP</h2>
             <p className="mt-2 text-xs text-zinc-500">Streamable HTTP — implemented at /mcp. Production follows deployment.</p>
             <p className="mt-4">

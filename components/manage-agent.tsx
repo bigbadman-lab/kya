@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { IdentityCard } from "@/components/identity-card";
+import { IdentityCardActions } from "@/components/identity-card-actions";
 import {
   AGENT_CAPABILITIES,
   AGENT_CATEGORIES,
@@ -11,6 +13,7 @@ import {
   type PublicAgentIdentity,
   type PublicIdentity,
 } from "@/lib/identity";
+import { cardFromIdentity } from "@/lib/identity-card";
 
 interface Challenge {
   challengeId: string;
@@ -293,6 +296,10 @@ export function ManageAgent() {
           <Link href={identity.identityUrl} className="mt-4 inline-flex text-sm text-white underline decoration-zinc-700 underline-offset-4">
             Public profile
           </Link>
+          <div className="mt-6">
+            <IdentityCard card={cardFromIdentity(identity)} />
+            <IdentityCardActions card={cardFromIdentity(identity)} />
+          </div>
         </section>
       ) : null}
 

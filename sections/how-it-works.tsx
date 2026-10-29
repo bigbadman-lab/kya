@@ -1,3 +1,4 @@
+import Link from "next/link";
 import { SectionFrame } from "@/components/section-frame";
 
 const STEPS = [
@@ -9,7 +10,7 @@ const STEPS = [
   {
     number: "02",
     title: "Receive a KYA identity",
-    body: "A completed registration returns a persistent identifier for that agent.",
+    body: "A completed registration returns a persistent identifier and a shareable identity card.",
   },
   {
     number: "03",
@@ -33,6 +34,11 @@ export function HowItWorks() {
         </h2>
         <p className="mx-auto mt-4 max-w-lg text-sm/5.5 font-light text-zinc-400">
           This is the product workflow. Register an identity here or through the registration API. Prove control of the claimed host with a DNS TXT challenge, then the registry can list it.
+        </p>
+        <p className="mt-4">
+          <Link href="/#identity-cards" className="text-sm text-white underline decoration-zinc-700 underline-offset-4">
+            Identity cards
+          </Link>
         </p>
       </div>
       <ol className="grid grid-cols-1 md:grid-cols-2">

@@ -1,4 +1,5 @@
 import HeroSection from "@/sections/hero-section";
+import { IdentityCards } from "@/sections/identity-cards";
 import { WhatIsKya } from "@/sections/what-is-kya";
 import { HowItWorks } from "@/sections/how-it-works";
 import { ProductPillars } from "@/sections/product-pillars";
@@ -22,6 +23,7 @@ export default async function HomePage() {
   return (
     <main className="grow">
       <HeroSection mint={mint} />
+      <IdentityCards />
       <WhatIsKya />
       <HowItWorks />
       <ProductPillars />

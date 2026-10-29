@@ -62,6 +62,15 @@ export default function DevelopersPage() {
         <p className="mt-6 max-w-2xl text-sm/5.5 font-light text-zinc-400">
           A 201 response includes the public profile, <span className="font-mono text-zinc-200">identityUrl</span>, <span className="font-mono text-zinc-200">domainVerification</span> set to unverified, <span className="font-mono text-zinc-200">credentialPrefix</span>, and <span className="font-mono text-zinc-200">managementToken</span>. The token is shown once and the response is not cacheable. Store it, then send it as <span className="font-mono text-zinc-200">Authorization: Bearer</span>. Do not put it in a URL. The dashboard asks for it again and does not read it from the address bar.
         </p>
+        <h3 className="mt-10 text-base text-zinc-100">Identity card</h3>
+        <p className="mt-4 max-w-2xl text-sm/5.5 font-light text-zinc-400">
+          GET /api/v1/agents/{"{publicId}"}/card.png returns a 1200 by 630 PNG of the public identity. No token is required, and none is accepted in the URL. The response is not stored by KYA. A download is a snapshot. The same URL, used as an image, is rendered from the current public record. Suspended and revoked identities return a minimal card with the public id and lifecycle only.
+        </p>
+        <pre className="mt-4 max-w-3xl overflow-x-auto border border-dashed border-zinc-800 p-4 font-mono text-xs leading-5 text-zinc-300">
+          {`<a href="https://knowyouragent.fun/agents/kya_…">
+  <img src="https://knowyouragent.fun/api/v1/agents/kya_…/card.png" alt="KYA identity card for Example agent" width="1200" height="630">
+</a>`}
+        </pre>
         <h3 className="mt-10 text-base text-zinc-100">DNS, after registration</h3>
         <ol className="mt-4 max-w-2xl list-decimal space-y-3 pl-5 text-sm/5.5 font-light text-zinc-400">
           <li>POST /api/v1/agents/{"{publicId}"}/challenges with the bearer token and {`{"method":"dns_txt"}`}.</li>

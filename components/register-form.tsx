@@ -2,7 +2,10 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import { IdentityCard } from "@/components/identity-card";
+import { IdentityCardActions } from "@/components/identity-card-actions";
 import { AGENT_CAPABILITIES, AGENT_CATEGORIES, type AgentCapability, type AgentCategory } from "@/lib/identity";
+import { cardFromRegistration } from "@/lib/identity-card";
 
 interface FormValues {
   name: string;
@@ -185,7 +188,7 @@ export function RegisterForm() {
     }
   }
 
-  if (issued) return <RegistrationResult issued={issued} panelRef={panelRef} />;
+  if (issued) return <RegistrationResult issued={issued} profile={values} panelRef={panelRef} />;
 
   return (
     <form className="mt-10 max-w-2xl" onSubmit={onSubmit} noValidate>
@@ -369,9 +372,11 @@ export function RegisterForm() {
 
 function RegistrationResult({
   issued,
+  profile,
   panelRef,
 }: {
   issued: IssuedIdentity;
+  profile: FormValues;
   panelRef: React.RefObject<HTMLDivElement | null>;
 }) {
   const [copied, setCopied] = useState("");
@@ -386,13 +391,25 @@ function RegistrationResult({
   }
 
   const identityHref = issued.identityUrl;
+  const card = cardFromRegistration({
+    publicId: issued.publicId,
+    identityUrl: issued.identityUrl,
+    name: profile.name,
+    category: profile.category,
+    capabilities: profile.capabilities,
+    endpoint: profile.endpoint,
+  });
 
   return (
     <div ref={panelRef} tabIndex={-1} className="kya-step mt-10 max-w-2xl scroll-mt-24 border border-dashed border-zinc-800 px-5 py-6 outline-none">
       <h2 className="text-2xl font-medium text-white">Identity registered</h2>
       <p className="mt-3 text-sm/5.5 font-light text-zinc-400">
-        The record exists and is unverified. Domain verification has not run. Do these three things before you leave.
+        The record exists and is unverified. Domain verification has not run. Store the management token before you leave. The card below is the public identity, and it starts registered.
       </p>
+      <div className="mt-6">
+        <IdentityCard card={card} />
+        <IdentityCardActions card={card} />
+      </div>
       <ol className="mt-6 space-y-6">
         <li>
           <p className="text-sm text-white">1. Store the management token</p>
