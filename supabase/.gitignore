@@ -1,0 +1,5 @@
+# Local Supabase CLI state. The hosted project is not linked from this directory.
+.branches
+.temp
+.env
+*.log

@@ -189,16 +189,33 @@ interface LayoutInfo {
   totalHeight: number;
 }
 
+// Canvas font shorthand cannot resolve CSS variables. An invalid value is
+// ignored and the context stays at the 10px default, which rasterizes the
+// headline as a few pixels inside the dashed box.
+const resolveCanvasFontFamily = (container: HTMLElement, fontFamily: string): string => {
+  const requested = fontFamily && fontFamily !== 'inherit' ? fontFamily : '';
+  if (!requested || requested.includes('var(') || requested.includes('inherit')) {
+    const probe = document.createElement('span');
+    Object.assign(probe.style, {
+      position: 'absolute',
+      visibility: 'hidden',
+      pointerEvents: 'none',
+      fontFamily: requested || 'inherit'
+    });
+    container.appendChild(probe);
+    const resolved = window.getComputedStyle(probe).fontFamily || 'sans-serif';
+    probe.remove();
+    return resolved;
+  }
+  return requested;
+};
+
 const computeLayout = (
   container: HTMLElement,
   width: number,
   props: RuntimeProps
 ): LayoutInfo => {
-  const compStyle = window.getComputedStyle(container);
-  const fontFamily =
-    props.fontFamily === 'inherit'
-      ? compStyle.fontFamily || 'sans-serif'
-      : props.fontFamily || 'sans-serif';
+  const fontFamily = resolveCanvasFontFamily(container, props.fontFamily);
 
   const isCustomTwoLine = Boolean(props.borderedText);
 
