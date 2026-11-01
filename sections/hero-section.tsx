@@ -89,7 +89,7 @@ export function HeroSection({ mint }: { mint?: string | null }) {
               </span>
             </Link>
           </motion.div>
-          <AgentPromptCta className="relative z-10 mt-5 px-4" />
+          <AgentPromptCta className="relative z-10 mt-5" />
           {mint ? <TokenMintCopy mint={mint} /> : null}
         </div>
       </div>

@@ -16,7 +16,7 @@ export function CTA() {
             <Animation />
             <div className="absolute inset-0 bg-[radial-gradient(ellipse_65%_55%_at_50%_50%,rgba(0,0,0,1)_30%,rgba(0,0,0,0.65)_65%,transparent_100%)] z-1" />
           </div>
-          <div className="relative z-10 flex flex-col items-center mx-auto">
+          <div className="relative z-10 mx-auto flex w-full max-w-xl flex-col items-center">
             <motion.h2
               className="text-4xl md:text-[40px] font-medium text-white leading-tight max-w-sm"
               initial={{ y: 50, opacity: 0 }}
