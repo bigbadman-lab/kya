@@ -29,7 +29,7 @@ export function Navbar() {
           <CornerMarks />
 
           <Link href="/" className="flex items-center shrink-0">
-            <BrandLogo priority height={40} />
+            <BrandLogo priority height={26} />
           </Link>
 
           <div
