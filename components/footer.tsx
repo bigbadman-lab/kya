@@ -6,6 +6,7 @@ const LINKS = [
   { href: "/identity", label: "Identity" },
   { href: "/verify", label: "Verification" },
   { href: "/agents", label: "Registry" },
+  { href: "/network", label: "Network" },
   { href: "/developers", label: "Developers" },
   { href: "/docs", label: "Documentation" },
   { href: "/about", label: "About" },

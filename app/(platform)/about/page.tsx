@@ -15,6 +15,7 @@ const NOW = [
   "A persistent public id and profile address.",
   "DNS TXT checks for the claimed hostname, valid for 90 days.",
   "A public registry and GET /api/v1/agents for identities whose verification is still current.",
+  "A network of domain verification, profile updates, and self-reported check-ins. A check-in is not endpoint uptime.",
   "Bearer-token management of a single identity.",
   "A remote MCP endpoint at /mcp for lookup, search, registration, and management.",
 ];

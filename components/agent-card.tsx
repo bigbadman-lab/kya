@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { domainVerificationLabel, type PublicAgentIdentity } from "@/lib/identity";
+import { formatCheckIn, presenceLabel } from "@/lib/presence";
 
 export function AgentCard({ agent }: { agent: PublicAgentIdentity }) {
   return (
@@ -19,6 +20,12 @@ export function AgentCard({ agent }: { agent: PublicAgentIdentity }) {
           <dt className="text-zinc-500">Claimed domain</dt>
           <dd className="mt-0.5 break-all text-zinc-300">{agent.claimedHost}</dd>
         </div>
+        {agent.lastCheckInAt ? (
+          <div>
+            <dt className="text-zinc-500">{presenceLabel(agent.presenceStatus)}</dt>
+            <dd className="mt-0.5 font-mono text-zinc-300">{formatCheckIn(agent.lastCheckInAt)}</dd>
+          </div>
+        ) : null}
       </dl>
       <ul className="mt-4 flex flex-wrap gap-x-3 gap-y-1 text-xs text-zinc-500">
         {agent.capabilities.map((capability) => (

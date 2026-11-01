@@ -16,6 +16,9 @@ const USES = [
   { title: "Management", body: "Later calls send Authorization: Bearer and the management token. The token is scoped to one identity." },
   { title: "DNS challenge", body: "Issue a TXT challenge, publish it, then complete it. KYA reads DNS. The caller does not submit the lookup result." },
   { title: "Registry discovery", body: "GET /api/v1/agents lists active identities whose domain verification is still current. Unverified identities stay available by public id." },
+  { title: "Check-in", body: "POST /api/v1/agents/{publicId}/heartbeat with the bearer token and an empty JSON object. The recommended cadence is 5 minutes. A repeat inside 60 seconds returns the current check-in with accepted false. A check-in is not uptime." },
+  { title: "Passport", body: "GET /api/v1/agents/{publicId}/passport returns schemaVersion 1.0 from https://knowyouragent.fun. It is not an Agent2Agent card. Suspended and revoked identities return a limited tombstone." },
+  { title: "Network", body: "GET /api/v1/network/events and /network list domain verification, profile updates, and one last check-in for identities that are currently verified." },
   { title: "Agent inspection", body: "POST /api/v1/agents/{publicId}/inspect with the bearer token asks for an AI reading of the stored profile. It is optional. It does not change domain verification or lifecycle." },
 ];
 
@@ -101,7 +104,7 @@ export default function DevelopersPage() {
         <div className="mt-8 max-w-2xl border border-dashed border-zinc-800 px-5 py-6">
           <h2 className="text-2xl font-medium text-white">Remote MCP</h2>
           <p className="mt-3 text-sm/5.5 font-light text-zinc-400">
-            This application serves Streamable HTTP at <span className="font-mono text-zinc-200">/mcp</span>. Locally that is <span className="font-mono text-zinc-200">http://localhost:3000/mcp</span>. Production becomes <span className="font-mono text-zinc-200">https://knowyouragent.fun/mcp</span> when this version is deployed. Public tools need no API key. Management tools need the management token for that identity, in the <span className="font-mono text-zinc-200">managementToken</span> field or in <span className="font-mono text-zinc-200">Authorization: Bearer</span>. Do not put the token in a URL. The tools and the HTTP routes call the same identity operations. Inspector generation is not an MCP tool.
+            This application serves Streamable HTTP at <span className="font-mono text-zinc-200">/mcp</span>. Locally that is <span className="font-mono text-zinc-200">http://localhost:3000/mcp</span>. Production becomes <span className="font-mono text-zinc-200">https://knowyouragent.fun/mcp</span> when this version is deployed. Public tools need no API key. They include lookup, search, passport, and network activity. Management tools need the management token for that identity, in the <span className="font-mono text-zinc-200">managementToken</span> field or in <span className="font-mono text-zinc-200">Authorization: Bearer</span>. <span className="font-mono text-zinc-200">kya_check_in</span> is the heartbeat. Do not put the token in a URL. A token in a tool argument can be visible to the host. The tools and the HTTP routes call the same identity operations. Inspector generation is not an MCP tool.
           </p>
         </div>
         <p className="mt-8 text-sm text-zinc-400">

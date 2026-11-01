@@ -8,6 +8,7 @@ import {
   parsePublicIdentity,
   parseRegistrySearch,
 } from "@/lib/identity";
+import { parseNetworkPage, type NetworkPage } from "@/lib/presence";
 import { type RegistryQuery } from "@/lib/discovery";
 import { parseStoredInspection, type PublicInspection } from "@/lib/inspector";
 import { createPublicSupabase } from "@/lib/public-supabase";
@@ -79,4 +80,21 @@ export async function searchPublicAgents(
   const result = parseRegistrySearch(jsonValue(data));
   if (!result) return { ok: false, reason: "unavailable" };
   return { ok: true, data: result };
+}
+
+export async function searchPublicNetwork(
+  cursor: string | null,
+  limit: number,
+): Promise<IdentityRead<NetworkPage>> {
+  await connection();
+  const supabase = createPublicSupabase();
+  if (!supabase) return { ok: false, reason: "unavailable" };
+  const { data, error } = await supabase.rpc("search_public_network", {
+    p_cursor: cursor,
+    p_limit: limit,
+  });
+  if (error) return { ok: false, reason: "unavailable" };
+  const page = parseNetworkPage(jsonValue(data));
+  if (!page) return { ok: false, reason: "unavailable" };
+  return { ok: true, data: page };
 }

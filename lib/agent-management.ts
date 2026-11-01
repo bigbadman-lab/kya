@@ -1,6 +1,6 @@
 import type { NextRequest } from "next/server";
 import { bearerManagementToken } from "@/lib/credentials";
-import { jsonNoStore } from "@/lib/http";
+import { jsonNoStore, unknownJsonFields } from "@/lib/http";
 import { identityRpc } from "@/lib/identity-rpc";
 import {
   challengeIdParam,
@@ -88,7 +88,7 @@ export async function readJsonObject(
   }
 
   const body = payload as Record<string, unknown>;
-  const unknown = Object.keys(body).filter((key) => !allowed.some((field) => field === key));
+  const unknown = unknownJsonFields(body, allowed);
   if (unknown.length > 0) {
     return { response: managementJson({ error: "kya_invalid", message: "The request contains a field that this route does not accept." }, 400) };
   }

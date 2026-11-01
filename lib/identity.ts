@@ -20,6 +20,7 @@ export type AgentCategory = (typeof AGENT_CATEGORIES)[number];
 export type AgentCapability = (typeof AGENT_CAPABILITIES)[number];
 export type LifecycleStatus = "active" | "suspended" | "revoked";
 export type DomainVerification = "unverified" | "verified" | "expired";
+export type PresenceStatus = "recently_active" | "last_seen" | "not_reported";
 
 export interface PublicAgentIdentity {
   publicId: string;
@@ -33,6 +34,8 @@ export interface PublicAgentIdentity {
   lifecycle: "active";
   domainVerification: DomainVerification;
   verificationExpiresAt: string | null;
+  presenceStatus: PresenceStatus;
+  lastCheckInAt: string | null;
   registered: true;
 }
 
@@ -70,6 +73,10 @@ function isCapability(value: unknown): value is AgentCapability {
 
 function isDomainVerification(value: unknown): value is DomainVerification {
   return value === "unverified" || value === "verified" || value === "expired";
+}
+
+function isPresenceStatus(value: unknown): value is PresenceStatus {
+  return value === "recently_active" || value === "last_seen" || value === "not_reported";
 }
 
 function text(record: Record<string, unknown>, key: string): string | null {
@@ -140,6 +147,9 @@ export function parsePublicIdentity(value: unknown): PublicIdentity | null {
     return null;
   }
 
+  const presence = readPresence(value);
+  if (!presence) return null;
+
   return {
     publicId,
     identityUrl: identityPath(publicId),
@@ -152,8 +162,22 @@ export function parsePublicIdentity(value: unknown): PublicIdentity | null {
     lifecycle: "active",
     domainVerification,
     verificationExpiresAt,
+    presenceStatus: presence.presenceStatus,
+    lastCheckInAt: presence.lastCheckInAt,
     registered: true,
   };
+}
+
+function readPresence(record: Record<string, unknown>): { presenceStatus: PresenceStatus; lastCheckInAt: string | null } | null {
+  const hasStatus = Object.prototype.hasOwnProperty.call(record, "presenceStatus");
+  const hasSeen = Object.prototype.hasOwnProperty.call(record, "lastCheckInAt");
+  if (!hasStatus && !hasSeen) return { presenceStatus: "not_reported", lastCheckInAt: null };
+  if (!hasStatus || !hasSeen || !isPresenceStatus(record.presenceStatus)) return null;
+  if (record.presenceStatus === "not_reported") {
+    return record.lastCheckInAt === null ? { presenceStatus: "not_reported", lastCheckInAt: null } : null;
+  }
+  if (typeof record.lastCheckInAt !== "string" || !Number.isFinite(Date.parse(record.lastCheckInAt))) return null;
+  return { presenceStatus: record.presenceStatus, lastCheckInAt: record.lastCheckInAt };
 }
 
 export function parseRegistrySearch(value: unknown): RegistrySearchResult | null {

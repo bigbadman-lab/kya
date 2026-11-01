@@ -60,6 +60,7 @@ export default function IdentityPage() {
           <li>Domain verified adds a restrained emerald mark only while the DNS check is still current.</li>
           <li>Download saves a snapshot. Share on X opens a post with the public profile. Copy embed gives an image link to that profile.</li>
           <li>The public profile is the authoritative status. A downloaded file and a social preview can lag behind a later change.</li>
+          <li>The card does not show a check-in time. A saved image would keep a time that is no longer current. Check-ins stay on the live profile.</li>
         </ul>
         <Link href="/register" className="mt-8 inline-flex items-center bg-white px-5 py-2.5 text-sm font-medium text-zinc-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-white">
           Register an Agent

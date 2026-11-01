@@ -15,6 +15,7 @@ import {
   publicIdParam,
   rotatedCredential,
 } from "./management-result.ts";
+import { parseCheckIn, parseNetworkCursor, parseNetworkPage, passportFor } from "./presence.ts";
 import { databaseErrorStatus, parseRegistration } from "./registration.ts";
 
 export interface CommandResult {
@@ -226,6 +227,53 @@ export async function searchIdentities(url: URL, search: PublicSearch): Promise<
   const checked = parseRegistrySearch(result.data);
   if (!checked) return failure(503, "kya_unavailable", "The identity service is unavailable.");
   return { status: 200, body: { agents: checked.agents, nextCursor: checked.nextCursor } };
+}
+
+export async function checkInIdentity(
+  input: { publicId: string; token: string },
+  rpc: IdentityRpc,
+): Promise<CommandResult> {
+  const publicId = publicIdParam(input.publicId);
+  if (!publicId) return failure(404, "kya_not_found", "The identity was not found.");
+  const result = await rpc("record_agent_check_in", {
+    p_public_id: publicId,
+    p_presented_token: input.token,
+  });
+  if ("error" in result) return rpcFailure(result.error, managementError, "The identity service is unavailable.");
+  const checkIn = parseCheckIn(result.data, publicId);
+  if (!checkIn) {
+    console.error("KYA management returned an unexpected result");
+    return failure(503, "kya_unavailable", "The identity service is unavailable.");
+  }
+  return { status: 200, body: checkIn };
+}
+
+export async function readPassport(publicId: string, lookup: PublicLookup): Promise<CommandResult> {
+  const result = await lookupIdentity(publicId, lookup);
+  if (result.status !== 200) return result;
+  const identity = identityResult(result.body);
+  if (!identity) return failure(503, "kya_unavailable", "The identity service is unavailable.");
+  return { status: 200, body: passportFor(identity) };
+}
+
+export async function readNetworkActivity(
+  input: { cursor: string | null; limit: number },
+  rpc: IdentityRpc,
+): Promise<CommandResult> {
+  if (!parseNetworkCursor(input.cursor) || input.limit < 1 || input.limit > 50) {
+    return failure(400, "kya_invalid", "The network query is not valid.");
+  }
+  const result = await rpc("search_public_network", {
+    p_cursor: input.cursor,
+    p_limit: input.limit,
+  });
+  if ("error" in result) return rpcFailure(result.error, managementError, "The network feed is unavailable.");
+  const page = parseNetworkPage(result.data);
+  if (!page) {
+    console.error("KYA network feed returned an unexpected result");
+    return failure(503, "kya_unavailable", "The network feed is unavailable.");
+  }
+  return { status: 200, body: { events: page.events, nextCursor: page.nextCursor } };
 }
 
 export function agentSearchResponse(url: URL, search: PublicSearch): Promise<Response> {

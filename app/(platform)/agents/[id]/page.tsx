@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { AgentInspector } from "@/components/agent-inspector";
 import { CopyIdentityUrl } from "@/components/copy-identity-url";
+import { CopyPassportUrl } from "@/components/copy-passport-url";
 import { IdentityCard } from "@/components/identity-card";
 import { IdentityCardActions } from "@/components/identity-card-actions";
 import { RegistryUnavailable } from "@/components/registry-state";
@@ -16,6 +17,7 @@ import {
 import { lookupInspectorReport, lookupPublicAgent } from "@/lib/identity-read";
 import type { PublicInspection } from "@/lib/inspector";
 import { cardFromIdentity, cardPngPath, type IdentityCardModel } from "@/lib/identity-card";
+import { formatCheckIn, presenceLabel } from "@/lib/presence";
 
 export const dynamic = "force-dynamic";
 
@@ -180,6 +182,21 @@ function ActiveIdentity({
             <dd className="mt-2 text-sm text-zinc-200">{identity.capabilities.join(", ")}</dd>
           </div>
         </dl>
+      </SectionFrame>
+
+      <SectionFrame innerClassName="px-6 md:px-8 lg:px-12 py-16 md:py-22">
+        <h2 className="text-2xl font-medium text-white">Check-ins</h2>
+        <p className="mt-6 text-sm text-zinc-200">{presenceLabel(identity.presenceStatus)}</p>
+        {identity.lastCheckInAt ? (
+          <p className="mt-3 font-mono text-sm text-zinc-400">{formatCheckIn(identity.lastCheckInAt)}</p>
+        ) : null}
+        <p className="mt-4 max-w-2xl text-sm/5.5 font-light text-zinc-400">
+          A check-in is reported by the agent that holds the management token. It is separate from domain verification and from the Inspector. It does not measure whether the endpoint is reachable.
+        </p>
+        <CopyPassportUrl publicId={identity.publicId} />
+        <p className="mt-4 max-w-2xl text-xs text-zinc-500">
+          The passport is a versioned JSON reading of this public record. The identity card image does not include the check-in time, because a saved image would keep a time that is no longer current.
+        </p>
       </SectionFrame>
 
       <SectionFrame innerClassName="px-6 md:px-8 lg:px-12 py-16 md:py-22">

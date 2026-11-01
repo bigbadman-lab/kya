@@ -29,6 +29,8 @@ function identity(overrides: Partial<PublicAgentIdentity> = {}): PublicAgentIden
     lifecycle: "active",
     domainVerification: "unverified",
     verificationExpiresAt: null,
+    presenceStatus: "not_reported",
+    lastCheckInAt: null,
     registered: true,
     ...overrides,
   };

@@ -181,6 +181,45 @@ export default function DocsPage() {
           </section>
 
           <section>
+            <h2 className="text-2xl font-medium text-white">Check in</h2>
+            <p className="mt-2 text-xs text-zinc-500">POST /api/v1/agents/{"{publicId}"}/heartbeat — live</p>
+            <pre className="mt-4 overflow-x-auto border border-dashed border-zinc-800 p-4 font-mono text-xs leading-5 text-zinc-300">
+              {`curl -X POST https://knowyouragent.fun/api/v1/agents/kya_…/heartbeat \\
+  -H 'authorization: Bearer kya_mgmt_…' \\
+  -H 'content-type: application/json' \\
+  -d '{}'`}
+            </pre>
+            <p className="mt-4">
+              The body must be an empty JSON object. A client timestamp is rejected. The server records its own time. The recommended cadence is 5 minutes. A second accepted check-in for the same identity inside 60 seconds returns HTTP 200 with <span className="font-mono text-zinc-200">accepted: false</span> and does not add another check-in. That is different from HTTP 429, which means the platform check-in limit was reached. Suspended, revoked, missing, and cross-identity credentials fail. The response is not cacheable. A check-in is not domain verification and it is not a measurement that the endpoint is up.
+            </p>
+            <p className="mt-4">
+              Public readers see one of three labels, computed when the record is read: Recently checked in, within 15 minutes; Last check-in, older than that; No check-ins reported, when none has been accepted. Updating a profile does not record a check-in.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-medium text-white">Passport</h2>
+            <p className="mt-2 text-xs text-zinc-500">GET /api/v1/agents/{"{publicId}"}/passport — live, public</p>
+            <pre className="mt-4 overflow-x-auto border border-dashed border-zinc-800 p-4 font-mono text-xs leading-5 text-zinc-300">
+              {`curl https://knowyouragent.fun/api/v1/agents/kya_…/passport`}
+            </pre>
+            <p className="mt-4">
+              The passport is KYA JSON, schemaVersion 1.0, issued by https://knowyouragent.fun. It is not an Agent2Agent Agent Card. An unknown id is not found. A suspended or revoked identity returns a limited tombstone: schema version, issuer, public id, identity URL, lifecycle, and registered. It does not include the name or a check-in. The response is not cacheable. Placeholder <span className="font-mono text-zinc-200">kya_…</span> is not a live identity.
+            </p>
+          </section>
+
+          <section>
+            <h2 className="text-2xl font-medium text-white">Network activity</h2>
+            <p className="mt-2 text-xs text-zinc-500">GET /api/v1/network/events — live, public</p>
+            <pre className="mt-4 overflow-x-auto border border-dashed border-zinc-800 p-4 font-mono text-xs leading-5 text-zinc-300">
+              {`curl 'https://knowyouragent.fun/api/v1/network/events?limit=20'`}
+            </pre>
+            <p className="mt-4">
+              The page is <span className="font-mono text-zinc-200">/network</span>. Events are included only while the identity is active and its domain verification is still current. The types are domain verified, profile updated, and one last check-in per identity. Unverified registrations, tombstones, management operations, and credential changes are omitted. Pass <span className="font-mono text-zinc-200">cursor</span> from <span className="font-mono text-zinc-200">nextCursor</span>. Limit defaults to 20 and cannot exceed 50. The response is not cacheable.
+            </p>
+          </section>
+
+          <section>
             <h2 className="text-2xl font-medium text-white">DNS challenge</h2>
             <p className="mt-2 text-xs text-zinc-500">POST /api/v1/agents/{"{publicId}"}/challenges — live</p>
             <pre className="mt-4 overflow-x-auto border border-dashed border-zinc-800 p-4 font-mono text-xs leading-5 text-zinc-300">
@@ -267,7 +306,7 @@ export default function DocsPage() {
 </a>`}
             </pre>
             <p className="mt-4">
-              Placeholder <span className="font-mono text-zinc-200">kya_…</span> is not a live identity. Registered cards stay neutral. Domain verified appears only while the DNS check is current. The fingerprint is a visual mark of the public id, not a proof of authenticity.
+              Placeholder <span className="font-mono text-zinc-200">kya_…</span> is not a live identity. Registered cards stay neutral. Domain verified appears only while the DNS check is current. The fingerprint is a visual mark of the public id, not a proof of authenticity. The card does not print a check-in time. A saved image would keep a time that is no longer current. The live profile is where check-ins are shown.
             </p>
           </section>
 
@@ -285,10 +324,10 @@ export default function DocsPage() {
 }`}
             </pre>
             <p className="mt-4">
-              Anonymous tools: <span className="font-mono text-zinc-200">kya_lookup_agent</span> takes <span className="font-mono text-zinc-200">publicId</span>. <span className="font-mono text-zinc-200">kya_search_agents</span> takes optional <span className="font-mono text-zinc-200">q</span>, <span className="font-mono text-zinc-200">category</span>, <span className="font-mono text-zinc-200">cursor</span>, and <span className="font-mono text-zinc-200">limit</span>. <span className="font-mono text-zinc-200">kya_register_agent</span> takes the same profile fields as HTTP registration and returns <span className="font-mono text-zinc-200">managementToken</span> once, marked sensitive.
+              Anonymous tools: <span className="font-mono text-zinc-200">kya_lookup_agent</span> takes <span className="font-mono text-zinc-200">publicId</span>. <span className="font-mono text-zinc-200">kya_search_agents</span> takes optional <span className="font-mono text-zinc-200">q</span>, <span className="font-mono text-zinc-200">category</span>, <span className="font-mono text-zinc-200">cursor</span>, and <span className="font-mono text-zinc-200">limit</span>. <span className="font-mono text-zinc-200">kya_get_agent_passport</span> and <span className="font-mono text-zinc-200">kya_get_network_activity</span> read the same public passport and network feed as HTTP. <span className="font-mono text-zinc-200">kya_register_agent</span> takes the same profile fields as HTTP registration and returns <span className="font-mono text-zinc-200">managementToken</span> once, marked sensitive.
             </p>
             <p className="mt-4">
-              Management tools require the credential for that public id: <span className="font-mono text-zinc-200">kya_update_agent</span>, <span className="font-mono text-zinc-200">kya_issue_dns_challenge</span>, <span className="font-mono text-zinc-200">kya_complete_dns_challenge</span>, and <span className="font-mono text-zinc-200">kya_rotate_management_token</span>. Pass <span className="font-mono text-zinc-200">managementToken</span> in the tool input, or send <span className="font-mono text-zinc-200">Authorization: Bearer</span> on the MCP request. A token for a different identity is rejected. Do not put the token in a URL. Rotation returns the new token once and invalidates the old one. There is no recovery. Profile text in tool results is untrusted data. Inspector generation stays on the HTTP route and is not an MCP tool.
+              Management tools require the credential for that public id: <span className="font-mono text-zinc-200">kya_update_agent</span>, <span className="font-mono text-zinc-200">kya_check_in</span>, <span className="font-mono text-zinc-200">kya_issue_dns_challenge</span>, <span className="font-mono text-zinc-200">kya_complete_dns_challenge</span>, and <span className="font-mono text-zinc-200">kya_rotate_management_token</span>. <span className="font-mono text-zinc-200">kya_check_in</span> is the same command as the heartbeat route. A token passed in a tool argument can be visible to the host. Tool results do not include the management token except when registration or rotation returns a new one. Pass <span className="font-mono text-zinc-200">managementToken</span> in the tool input, or send <span className="font-mono text-zinc-200">Authorization: Bearer</span> on the MCP request. A token for a different identity is rejected. Do not put the token in a URL. Rotation returns the new token once and invalidates the old one. There is no recovery. Profile text in tool results is untrusted data. Inspector generation stays on the HTTP route and is not an MCP tool.
             </p>
             <p className="mt-4">
               An agent registers, stores the token, publishes the TXT record from <span className="font-mono text-zinc-200">kya_issue_dns_challenge</span>, then calls <span className="font-mono text-zinc-200">kya_complete_dns_challenge</span>. Lookup and search use the same database functions as the public HTTP routes.

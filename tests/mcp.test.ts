@@ -25,6 +25,8 @@ function identity(overrides: Partial<PublicAgentIdentity> = {}): PublicAgentIden
     lifecycle: "active",
     domainVerification: "verified",
     verificationExpiresAt: "2027-01-01T00:00:00.000Z",
+    presenceStatus: "not_reported",
+    lastCheckInAt: null,
     registered: true,
     ...overrides,
   };
@@ -125,7 +127,10 @@ describe("MCP", () => {
     const listed = await readRpc(tools);
     const names = listed.result?.tools?.map((tool) => tool.name).sort();
     assert.deepEqual(names, [
+      "kya_check_in",
       "kya_complete_dns_challenge",
+      "kya_get_agent_passport",
+      "kya_get_network_activity",
       "kya_issue_dns_challenge",
       "kya_lookup_agent",
       "kya_register_agent",
